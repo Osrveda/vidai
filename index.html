@@ -1141,7 +1141,7 @@ function handleFileUpload(input) {
   }
 }
 
-async function generateVideo() {
+async function generateVideo() {   const prompt = document.getElementById('promptArea')?.value || '';   if (!prompt.trim()) { alert('Prompt likho pehle!'); return; }   if (!currentUser) { openModal('login'); return; }   const tool = document.getElementById('toolDropLabel')?.textContent || 'kling-video';   const btn = document.querySelector('[onclick="generateVideo()"]');   if (btn) { btn.textContent = '⏳ Generating...'; btn.disabled = true; }   try {     const res = await fetch('/.netlify/functions/generate-video', {       method: 'POST',       headers: { 'Content-Type': 'application/json' },       body: JSON.stringify({ prompt, tool, userId: currentUser.id })     });     const data = await res.json();     if (data.success) {       alert('✅ Video generation started! Task ID: ' + data.taskId);       await sb.from('video_history').insert({ user_id: currentUser.id, prompt, tool_used: tool, video_url: data.taskId || '' });     } else {       alert('❌ Error: ' + (data.error || 'Please try again'));     }   } catch (err) {     alert('❌ Network error. Please try again.');   }   if (btn) { btn.textContent = 'Generate →'; btn.disabled = false; } }
   const prompt = document.getElementById('promptArea')?.value || '';
   if (!prompt.trim()) { alert('Prompt likho pehle!'); return; }
   const tool = document.getElementById('toolDropLabel')?.textContent || 'Text to Video';
