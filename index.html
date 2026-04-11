@@ -127,7 +127,15 @@ body.cursor-hover #curR{width:44px;height:44px;border-color:rgba(232,121,249,.6)
 .user-menu.active{display:flex;align-items:center;gap:8px}
 .user-avatar{width:34px;height:34px;border-radius:50%;border:2px solid var(--p2);object-fit:cover;cursor:pointer}
 .user-avatar-placeholder{width:34px;height:34px;border-radius:50%;border:2px solid var(--p2);background:var(--p3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--p2);cursor:pointer}
-.user-credits{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--p2);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.user-credits{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--p2);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer}
+.buy-popup{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center}
+.buy-popup.open{display:flex}
+.buy-box{background:#060d0d;border:1px solid rgba(34,197,94,.3);border-radius:24px;padding:36px;max-width:480px;width:90%;position:relative}
+.buy-pkg{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.15);border-radius:14px;padding:18px 20px;cursor:pointer;transition:all .25s;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.buy-pkg:hover,.buy-pkg.popular{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4)}
+.buy-pkg-cr{font-size:22px;font-weight:900;color:var(--p2);font-family:Sora,sans-serif}
+.buy-pkg-pr{font-size:15px;font-weight:700;color:var(--text)}
+.buy-pkg-badge{background:linear-gradient(135deg,var(--p),var(--b));color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px}
 .user-dropdown{position:absolute;top:44px;right:0;background:#0a1a0a;border:1px solid var(--border2);border-radius:14px;padding:8px;min-width:180px;box-shadow:0 20px 60px rgba(0,0,0,.6);display:none;z-index:1001}
 .user-menu:hover .user-dropdown{display:block}
 .user-dropdown a{display:block;padding:10px 14px;color:var(--muted2);text-decoration:none;font-size:13px;border-radius:8px;transition:all .2s}
@@ -515,6 +523,9 @@ body::before{content:'' !important;position:fixed !important;inset:0 !important;
         <div class="user-avatar-placeholder" id="userAvatar">U</div>
         <div class="user-dropdown">
           <a href="#">Dashboard</a><a href="#">My Videos</a><hr>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="history.html">My Videos</a>
+          <a href="refer.html">Refer & Earn</a><hr>
           <a href="#" onclick="signOut(); return false;">Sign Out</a>
         </div>
       </div>
@@ -626,31 +637,44 @@ body::before{content:'' !important;position:fixed !important;inset:0 !important;
 
       <div class="gen-opts">
         <div class="gog">
-          <label class="glbl">Quality</label>
+          <label class="glbl">Quality & Model</label>
           <div class="gpills">
-            <button type="button" class="gpill" onclick="setPill(this,'q','720p')">720p</button>
-            <button type="button" class="gpill on" onclick="setPill(this,'q','1080p')">1080p</button>
-            <button type="button" class="gpill" onclick="setPill(this,'q','4K')">4K</button>
+            <button type="button" class="gpill on" id="qFree" onclick="setQuality(this,'free')">🆓 Free<span style="font-size:9px;display:block;color:var(--muted)">Grok</span></button>
+            <button type="button" class="gpill" id="qGood" onclick="setQuality(this,'good')">⭐ Good<span style="font-size:9px;display:block;color:var(--muted)">Sora 2</span></button>
+            <button type="button" class="gpill" id="qPro" onclick="setQuality(this,'pro')">🔥 Pro<span style="font-size:9px;display:block;color:var(--muted)">Kling 2.5T</span></button>
+            <button type="button" class="gpill" id="qPremium" onclick="setQuality(this,'premium')">👑 Premium<span style="font-size:9px;display:block;color:var(--muted)">Kling 2.6</span></button>
           </div>
         </div>
         <div class="gog">
           <label class="glbl">Duration</label>
           <div class="gpills">
-            <button type="button" class="gpill" onclick="setPill(this,'d','5')">5s</button>
-            <button type="button" class="gpill on" onclick="setPill(this,'d','10')">10s</button>
-            <button type="button" class="gpill" onclick="setPill(this,'d','30')">30s</button>
-            <button type="button" class="gpill" onclick="setPill(this,'d','60')">1m</button>
-            <button type="button" class="gpill" onclick="setPill(this,'d','120')">2m</button>
-            <button type="button" class="gpill" onclick="setPill(this,'d','180')">3m</button>
+            <button type="button" class="gpill on" id="d5btn" onclick="setDuration(this,'5')">5s</button>
+            <button type="button" class="gpill" id="d10btn" onclick="setDuration(this,'10')">10s</button>
+            <button type="button" class="gpill" id="d15btn" onclick="setDuration(this,'15')">15s</button>
           </div>
+        </div>
+      </div>
+      <!-- Audio Toggle — only for Pro/Premium -->
+      <div id="audioToggleWrap" style="display:none;margin-bottom:14px">
+        <label class="glbl">Audio</label>
+        <div class="gpills">
+          <button type="button" class="gpill on" id="audioOff" onclick="setAudio(this,false)">🔇 Without Audio</button>
+          <button type="button" class="gpill" id="audioOn" onclick="setAudio(this,true)">🔊 With Audio <span style="font-size:9px;color:var(--p2)">×2 cr</span></button>
         </div>
       </div>
       <div class="gen-foot">
         <div>
-          <div class="cr-badge" id="crBadge">204 cr</div>
-          <div class="cr-sub" id="crSub">1080p · 10s · Text to Video</div>
+          <div class="cr-badge" id="crBadge">49 cr</div>
+          <div class="cr-sub" id="crSub">Free · 5s · Text to Video</div>
         </div>
-        <button type="button" class="gen-go" onclick="currentUser ? generateVideo() : openModal('signup')">Generate →</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="button" onclick="openBuyCredits()" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--p2);padding:10px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Sora,sans-serif">💳 Buy Credits</button>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button type="button" id="hinglishBtn" onclick="hinglishToPrompt()" style="flex:1;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:#22c55e;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:700;font-family:Sora,sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(34,197,94,.15)'" onmouseout="this.style.background='rgba(34,197,94,.08)'">🇮🇳 Hinglish → English</button>
+            <button type="button" onclick="openTemplates()" style="flex:1;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);color:#818cf8;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:700;font-family:Sora,sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(99,102,241,.15)'" onmouseout="this.style.background='rgba(99,102,241,.08)'">📝 Templates</button>
+          </div>
+          <button type="button" class="gen-go" onclick="generateVideo()">Generate →</button>
+        </div>
       </div>
     </div>
     <div class="gen-preview-col">
@@ -1003,7 +1027,17 @@ const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.targe
 document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>ro.observe(el));
 
 // ═══ TOOL DROPDOWN ═══
-let cT='ttv',cQ='1080p',cD='10';
+let cT='ttv', cD='5', cQuality='free', cAudio=false;
+
+const lipSyncTools = ['ls','ta','tp','ac'];
+const lipSyncCredits = { free:10, good:39, pro:26, premium:52 };
+const qCredits = {
+  free:    { '5':49,  '10':'❌', '15':'❌' },
+  good:    { '5':91,  '10':114,  '15':182  },
+  pro:     { '5':137, '10':273,  '15':'❌' },
+  premium: { '5':179, '10':358,  '15':'❌' }
+};
+
 const toolCredits={ttv:120,itv:60,stv:100,pa:25,tp:60,vtv:70,fs:80,ls:150,ac:100,ta:80,se:25,br:20,aie:30,or:35,cap:15,stt:55,dg:70};
 const qM={'720p':1,'1080p':1.7,'4K':3.5},dM={'5':1,'10':1.7,'30':3,'60':5,'120':8,'180':11};
 
@@ -1017,7 +1051,6 @@ function selectTool(val,name,icon,cr){
   cT=val;
   document.getElementById('toolDropLabel').textContent=name;
   document.getElementById('toolDropIcon').textContent=icon;
-  document.getElementById('toolDropCr').textContent=cr;
   document.getElementById('toolDropMenu').classList.remove('open');
   document.getElementById('toolDropArrow').style.transform='';
   updCr();
@@ -1030,20 +1063,88 @@ document.addEventListener('click',function(e){
   }
 });
 
+function setQuality(btn,q){
+  document.querySelectorAll('#qFree,#qGood,#qPro,#qPremium').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  cQuality=q;
+  // Free: only 5s allowed
+  const d10=document.getElementById('d10btn');
+  const d15=document.getElementById('d15btn');
+  if(q==='free'){
+    d10.disabled=true;d10.style.opacity='0.35';
+    d15.disabled=true;d15.style.opacity='0.35';
+    setDuration(document.getElementById('d5btn'),'5');
+  } else if(q==='good'){
+    d10.disabled=false;d10.style.opacity='1';
+    d15.disabled=false;d15.style.opacity='1';
+  } else {
+    // pro/premium: 5s and 10s only, no 15s
+    d10.disabled=false;d10.style.opacity='1';
+    d15.disabled=true;d15.style.opacity='0.35';
+    if(cD==='15') setDuration(document.getElementById('d5btn'),'5');
+  }
+  // Audio toggle: only for pro/premium
+  const audioWrap=document.getElementById('audioToggleWrap');
+  if(q==='pro'||q==='premium'){
+    audioWrap.style.display='block';
+  } else {
+    audioWrap.style.display='none';
+    cAudio=false;
+  }
+  updCr();
+}
+
+function setDuration(btn,d){
+  document.querySelectorAll('#d5btn,#d10btn,#d15btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  cD=d;
+  updCr();
+}
+
+function setAudio(btn,val){
+  document.querySelectorAll('#audioOff,#audioOn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  cAudio=val;
+  updCr();
+}
+
 function updCr(){
-  const cr=Math.round((toolCredits[cT]||80)*(qM[cQ]||1)*(dM[cD]||1));
   const names={ttv:'Text to Video',itv:'Image to Video',stv:'Script to Video',pa:'Photo Animate',tp:'Talking Photo',vtv:'Video to Video',fs:'Face Swap',ls:'Lip Sync',ac:'Avatar Create',ta:'Talking Avatar',dg:'Dance Generator',se:'Sound Effects',br:'Background Remove',aie:'AI Enhance',or:'Object Remove',cap:'Auto Captions',stt:'Style Transfer'};
-  document.getElementById('crBadge').textContent=cr+' cr';
-  document.getElementById('crSub').textContent=cQ+' · '+(cD=='60'?'1 min':cD=='120'?'2 min':cD=='180'?'3 min':cD+'s')+' · '+(names[cT]||cT);
+  const qlabels={free:'Free(Grok)',good:'Good(Sora2)',pro:'Pro(Kling2.5T)',premium:'Premium(Kling2.6)'};
+  let crText='—', crSub='';
+  if(lipSyncTools.includes(cT)){
+    const perSec=lipSyncCredits[cQuality]||10;
+    const total=perSec*15;
+    crText=total+' cr';
+    crSub=qlabels[cQuality]+' · 15s · '+(names[cT]||cT);
+  } else {
+    const crVal=qCredits[cQuality]?.[cD];
+    if(!crVal||crVal==='❌'){
+      crText='N/A';
+      crSub='This duration not available for selected quality';
+    } else {
+      let cr=parseInt(crVal);
+      if(cAudio && (cQuality==='pro'||cQuality==='premium')) cr=cr*2;
+      crText=cr+' cr';
+      crSub=qlabels[cQuality]+' · '+cD+'s'+(cAudio?' · 🔊Audio':'')+' · '+(names[cT]||cT);
+    }
+  }
+  document.getElementById('crBadge').textContent=crText;
+  document.getElementById('crSub').textContent=crSub;
 }
 
 function setPill(btn,t,v){
   btn.parentNode.querySelectorAll('.gpill').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  if(t==='q')cQ=v;
   if(t==='d')cD=v;
   updCr();
 }
+
+// Buy credits popup
+function openBuyCredits(){ document.getElementById('buyPopup').classList.add('open'); }
+function closeBuyCredits(){ document.getElementById('buyPopup').classList.remove('open'); }
+document.getElementById('buyPopup')?.addEventListener('click',function(e){ if(e.target===this) closeBuyCredits(); });
+
 updCr();
 
 // ═══ CATEGORY FILTERS ═══
@@ -1059,7 +1160,90 @@ function filterCat2(btn,cat){
   document.querySelectorAll('.tc').forEach(c=>{c.style.display=(cat==='All'||c.dataset.cat===cat)?'block':'none';});
 }
 
-// ═══ BEFORE/AFTER SLIDER ═══
+// ═══ PROMPT TEMPLATES ═══
+const promptTemplates = [
+  {cat:'🎬 Viral', text:'A cinematic drone shot flying over golden wheat fields at sunset, warm light, 4K'},
+  {cat:'🎬 Viral', text:'A woman dancing in slow motion in a neon-lit rain, cyberpunk city, vivid colors'},
+  {cat:'📱 Reels', text:'Close-up of sizzling butter melting on hot tawa, golden brown, food photography'},
+  {cat:'📱 Reels', text:'A man opening a luxury watch box, dramatic lighting, product reveal'},
+  {cat:'🛍 Product', text:'A luxury perfume bottle spinning on a reflective surface, dramatic studio lighting'},
+  {cat:'🛍 Product', text:'Smartphone floating in mid-air with colorful particles around it, tech commercial'},
+  {cat:'🎭 Creative', text:'A tiger walking through a misty jungle at dawn, cinematic, slow motion'},
+  {cat:'🎭 Creative', text:'Fireworks exploding over a dark sky reflected in a lake, 4K cinematic'},
+  {cat:'🏠 Real Estate', text:'Aerial drone shot of a modern villa with swimming pool at golden hour'},
+  {cat:'💪 Fitness', text:'Athletic person doing parkour on rooftop at sunrise, dynamic action shot'},
+  {cat:'🇮🇳 India', text:'A Rajasthani woman in colorful lehenga spinning in a desert, golden hour'},
+  {cat:'🇮🇳 India', text:'Street food vendor making chai in Old Delhi at dawn, steam rising, cinematic'},
+];
+
+function openTemplates(){
+  document.getElementById('templatesPopup').classList.add('open');
+}
+function closeTemplates(){
+  document.getElementById('templatesPopup').classList.remove('open');
+}
+function useTemplate(text){
+  document.getElementById('promptArea').value = text;
+  closeTemplates();
+}
+
+// ═══ HINGLISH PROMPT HELPER ═══
+async function hinglishToPrompt(){
+  const area = document.getElementById('promptArea');
+  const txt = area.value.trim();
+  if(!txt){ alert('Pehle kuch likho!'); return; }
+  const btn = document.getElementById('hinglishBtn');
+  btn.textContent = '⏳ Translating...'; btn.disabled = true;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:200,
+        messages:[{role:'user',content:`Convert this Hindi/Hinglish video description into a professional English AI video generation prompt (cinematic style, max 2 sentences): "${txt}". Reply ONLY with the English prompt, nothing else.`}]
+      })
+    });
+    const d = await res.json();
+    const newPrompt = d.content?.[0]?.text?.trim();
+    if(newPrompt) area.value = newPrompt;
+  } catch(e){ alert('Translation error, try again'); }
+  btn.textContent = '🇮🇳 Hinglish → English'; btn.disabled = false;
+}
+
+// ═══ PROGRESS BAR ═══
+function showProgress(previewBox, step, msg){
+  const steps = ['Prompt Processing...','AI Model Loading...','Video Rendering...','Almost Done!'];
+  const pct = [20, 45, 75, 95];
+  const idx = step - 1;
+  previewBox.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px;padding:30px">
+      <div style="font-size:32px">🎬</div>
+      <div style="color:#22d3ee;font-size:14px;font-weight:700">${steps[idx]||msg}</div>
+      <div style="width:100%;max-width:260px;background:rgba(255,255,255,.08);border-radius:100px;height:6px;overflow:hidden">
+        <div style="height:100%;width:${pct[idx]||20}%;background:linear-gradient(90deg,#22d3ee,#e879f9);border-radius:100px;transition:width 1.2s ease"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${steps.map((s,i)=>`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:${i<idx?'#22d3ee':i===idx?'#f0fff4':'rgba(255,255,255,.3)'}">
+          <div style="width:6px;height:6px;border-radius:50%;background:${i<idx?'#22d3ee':i===idx?'#e879f9':'rgba(255,255,255,.2)'}"></div>
+          Step ${i+1}
+        </div>${i<3?'<div style="width:16px;height:1px;background:rgba(255,255,255,.15)"></div>':''}`).join('')}
+      </div>
+      <div style="color:rgba(255,255,255,.4);font-size:11px">15-60 seconds lagenge</div>
+    </div>`;
+}
+
+// ═══ FREE TRIAL (no signup) ═══
+function getFreeTrialCount(){ return parseInt(localStorage.getItem('vidai_free_trial')||'0'); }
+function incFreeTrialCount(){ localStorage.setItem('vidai_free_trial', getFreeTrialCount()+1); }
+
+// ═══ REFERRAL ═══
+function getReferralCode(){
+  if(!currentUser) return null;
+  return 'VIDAI'+currentUser.id.substring(0,6).toUpperCase();
+}
+
+
 const baWrap=document.getElementById('baWrap');
 if(baWrap){
   const baBefore=document.getElementById('baBefore'),baLine=document.getElementById('baLine'),baHandle=document.getElementById('baHandle');
@@ -1164,33 +1348,71 @@ function handleFileUpload(input, type) {
 async function generateVideo() {
   const prompt = document.getElementById('promptArea')?.value || '';
   if (!prompt.trim()) { alert('Prompt likho pehle!'); return; }
-  if (!currentUser) { openModal('login'); return; }
-  const tool = cT || 'ttv';
+
+  // FREE TRIAL: allow 1 video without signup
+  const isGuest = !currentUser;
+  if (isGuest) {
+    if (getFreeTrialCount() >= 1) {
+      openModal('signup');
+      return;
+    }
+  }
+
+  const crBadge = document.getElementById('crBadge').textContent;
+  if (crBadge === 'N/A') { alert('❌ Ye duration is quality ke saath available nahi. Quality ya duration change karo.'); return; }
+
+  // Logged-in free user: 2 video limit
+  if (!isGuest && cQuality === 'free') {
+    const { count } = await sb.from('video_history').select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id).eq('quality', 'free');
+    if (count >= 2) { openBuyCredits(); return; }
+  }
+
   const genBtn = document.querySelector('[onclick*="generateVideo"]');
   const previewBox = document.querySelector('.gen-preview-box');
   if (genBtn) { genBtn.textContent = '⏳ Generating...'; genBtn.disabled = true; }
-  if (previewBox) previewBox.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px"><div style="width:48px;height:48px;border:3px solid rgba(34,211,238,.3);border-top-color:#22d3ee;border-radius:50%;animation:spin 1s linear infinite"></div><div style="color:#22d3ee;font-size:13px;font-weight:600">Video ban raha hai...</div><div style="color:#6BA8C4;font-size:11px">18-30 seconds lagenge</div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  if (previewBox) showProgress(previewBox, 1);
+
+  // Animate progress steps
+  let stepTimer1 = setTimeout(() => { if(previewBox) showProgress(previewBox, 2); }, 4000);
+  let stepTimer2 = setTimeout(() => { if(previewBox) showProgress(previewBox, 3); }, 12000);
+  let stepTimer3 = setTimeout(() => { if(previewBox) showProgress(previewBox, 4); }, 28000);
+
+  function clearStepTimers(){ clearTimeout(stepTimer1); clearTimeout(stepTimer2); clearTimeout(stepTimer3); }
+
   try {
     const res = await fetch('/.netlify/functions/generate-video', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, tool: cT || 'ttv', quality: cQ || '1080p', duration: parseInt(cD) || 10, userId: currentUser.id })
+      body: JSON.stringify({
+        prompt,
+        quality: isGuest ? 'free' : cQuality,
+        duration: isGuest ? '5' : cD,
+        audio: isGuest ? false : cAudio,
+        tool: cT,
+        userId: currentUser?.id || 'guest'
+      })
     });
     const data = await res.json();
     if (!data.success) {
-      alert('❌ Error: ' + (data.error || 'Please try again'));
+      clearStepTimers();
+      const errMsg = data.error || 'Please try again';
       if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
-      if(previewBox) previewBox.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#f87171;font-size:13px">❌ Error: ' + (data.error||'Try again') + '</div>';
+      if(previewBox) previewBox.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#f87171;font-size:13px;padding:20px;text-align:center">❌ ' + errMsg + '</div>';
+      if(errMsg.toLowerCase().includes('credit')||errMsg.toLowerCase().includes('insufficient')) openBuyCredits();
       return;
     }
+
+    if(isGuest) incFreeTrialCount();
+
     const taskId = data.taskId;
-    await sb.from('video_history').insert({ user_id: currentUser.id, prompt, tool_used: tool, video_url: taskId });
+    if(!isGuest) await sb.from('video_history').insert({ user_id: currentUser.id, prompt, tool_used: cT, quality: cQuality, video_url: taskId, credits_used: parseInt(crBadge)||0 });
+
     let tries = 0;
     const poll = setInterval(async () => {
       tries++;
-      if (tries > 60) {
-        clearInterval(poll);
-        if(previewBox) previewBox.innerHTML = '<div style="color:#fbbf24;text-align:center;padding:20px;font-size:13px">⚠️ Timeout — Please check kie.ai logs</div>';
+      if (tries > 72) {
+        clearInterval(poll); clearStepTimers();
+        if(previewBox) previewBox.innerHTML = '<div style="color:#fbbf24;text-align:center;padding:20px;font-size:13px">⚠️ Timeout — Video ban rahi hai, refresh karke history check karo</div>';
         if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
         return;
       }
@@ -1198,18 +1420,26 @@ async function generateVideo() {
         const sr = await fetch('/.netlify/functions/check-video?taskId=' + taskId);
         const sd = await sr.json();
         if (sd.status === 'completed' && sd.videoUrl) {
-          clearInterval(poll);
-          if (previewBox) previewBox.innerHTML = `<video src="${sd.videoUrl}" controls autoplay style="width:100%;height:100%;border-radius:20px;object-fit:cover"></video><a href="${sd.videoUrl}" download="vidai-video.mp4" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;background:linear-gradient(135deg,#22d3ee,#e879f9);color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px">⬇️ Download Video</a>`;
-          await sb.from('video_history').update({ video_url: sd.videoUrl }).eq('user_id', currentUser.id).eq('video_url', taskId);
+          clearInterval(poll); clearStepTimers();
+          if (previewBox) previewBox.innerHTML = `
+            <video src="${sd.videoUrl}" controls autoplay style="width:100%;height:100%;border-radius:20px;object-fit:cover"></video>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <a href="${sd.videoUrl}" download="vidai-video.mp4" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#22d3ee,#e879f9);color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px">⬇️ Download</a>
+              ${isGuest ? '<button onclick="openModal(\'signup\')" style="flex:1;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:#22c55e;padding:12px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">🚀 Save & Make More</button>' : ''}
+            </div>`;
+          if(!isGuest){ await sb.from('video_history').update({ video_url: sd.videoUrl }).eq('user_id', currentUser.id).eq('video_url', taskId); }
           if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
         } else if (sd.status === 'failed') {
-          clearInterval(poll);
-          if(previewBox) previewBox.innerHTML = '<div style="color:#f87171;text-align:center;padding:20px;font-size:13px">❌ Video generation failed. Try again.</div>';
+          clearInterval(poll); clearStepTimers();
+          // Auto-refund credits if logged in
+          if(!isGuest){ const crAmt=parseInt(crBadge)||0; if(crAmt>0) await sb.rpc('add_credits',{uid:currentUser.id, amount:crAmt}).catch(()=>{}); }
+          if(previewBox) previewBox.innerHTML = '<div style="color:#f87171;text-align:center;padding:20px;font-size:13px">❌ Video generation failed.<br><span style="color:#4ade80;font-size:11px">✅ Credits auto-refund ho gaye</span></div>';
           if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
         }
       } catch(e) {}
     }, 5000);
   } catch (err) {
+    clearStepTimers();
     alert('❌ Network error. Please try again.');
     if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
   }
@@ -1254,6 +1484,54 @@ const vObs=new IntersectionObserver((entries)=>{
   });
 },{threshold:0.1});
 document.querySelectorAll('video[autoplay]').forEach(v=>{v.muted=true;vObs.observe(v);});
+</script>
+
+<!-- BUY CREDITS POPUP -->
+<div class="buy-popup" id="buyPopup">
+  <div class="buy-box">
+    <button onclick="closeBuyCredits()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer">✕</button>
+    <div style="font-size:12px;font-weight:700;letter-spacing:4px;color:var(--p2);text-transform:uppercase;margin-bottom:8px">Buy Credits</div>
+    <h3 style="font-family:Sora,sans-serif;font-size:22px;font-weight:900;margin-bottom:6px">Top Up Your Credits</h3>
+    <p style="color:var(--muted2);font-size:13px;margin-bottom:24px">Credits never expire. Use for any tool anytime.</p>
+    <div class="buy-pkg" onclick="handlePayment('starter')">
+      <div><div class="buy-pkg-cr">500 cr</div><div style="font-size:11px;color:var(--muted2);margin-top:3px">~10 videos (Free quality)</div></div>
+      <div style="text-align:right"><div class="buy-pkg-pr">₹199</div><div style="font-size:10px;color:var(--muted2)">₹0.40/cr</div></div>
+    </div>
+    <div class="buy-pkg popular" onclick="handlePayment('basic')" style="position:relative">
+      <span class="buy-pkg-badge" style="position:absolute;top:-10px;left:50%;transform:translateX(-50%)">MOST POPULAR</span>
+      <div><div class="buy-pkg-cr">1,500 cr</div><div style="font-size:11px;color:var(--muted2);margin-top:3px">~30 videos (Good quality)</div></div>
+      <div style="text-align:right"><div class="buy-pkg-pr">₹499</div><div style="font-size:10px;color:var(--muted2)">₹0.33/cr</div></div>
+    </div>
+    <div class="buy-pkg" onclick="handlePayment('pro')">
+      <div><div class="buy-pkg-cr">5,000 cr</div><div style="font-size:11px;color:var(--muted2);margin-top:3px">~36 Pro quality videos</div></div>
+      <div style="text-align:right"><div class="buy-pkg-pr">₹1,299</div><div style="font-size:10px;color:var(--muted2)">₹0.26/cr</div></div>
+    </div>
+    <div class="buy-pkg" onclick="handlePayment('premium')">
+      <div><div class="buy-pkg-cr">15,000 cr</div><div style="font-size:11px;color:var(--muted2);margin-top:3px">~84 Premium videos</div></div>
+      <div style="text-align:right"><div class="buy-pkg-pr">₹2,999</div><div style="font-size:10px;color:var(--muted2)">₹0.20/cr</div></div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:16px">UPI · Cards · NetBanking · WhatsApp: +91 6283830128</p>
+  </div>
+</div>
+<!-- TEMPLATES POPUP -->
+<div id="templatesPopup" style="position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center" onclick="if(event.target===this)closeTemplates()">
+  <div style="background:#060d0d;border:1px solid rgba(34,197,94,.3);border-radius:24px;padding:32px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;position:relative">
+    <button onclick="closeTemplates()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#7abf8a;font-size:20px;cursor:pointer">✕</button>
+    <div style="font-size:11px;font-weight:700;letter-spacing:4px;color:#22c55e;text-transform:uppercase;margin-bottom:8px">Quick Start</div>
+    <h3 style="font-family:Sora,sans-serif;font-size:20px;font-weight:900;margin-bottom:20px">Prompt Templates</h3>
+    <div style="display:grid;gap:10px">
+      ${promptTemplates.map(t=>`<div onclick="useTemplate('${t.text.replace(/'/g,"\\'")}')" style="background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.15);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='rgba(34,197,94,.4)';this.style.background='rgba(34,197,94,.08)'" onmouseout="this.style.borderColor='rgba(34,197,94,.15)';this.style.background='rgba(34,197,94,.04)'">
+        <div style="font-size:10px;font-weight:700;color:#22c55e;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">${t.cat}</div>
+        <div style="font-size:13px;color:#f0fff4;line-height:1.5">${t.text}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('templatesPopup').style.display='none';
+document.getElementById('templatesPopup').style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center';
+function openTemplates(){ document.getElementById('templatesPopup').style.display='flex'; }
+function closeTemplates(){ document.getElementById('templatesPopup').style.display='none'; }
 </script>
 </body>
 </html>
