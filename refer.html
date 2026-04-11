@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refer & Earn — VidAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#040808;--border:rgba(34,197,94,.1);--border2:rgba(34,197,94,.22);--text:#f0fff4;--muted:#3d5c45;--muted2:#7abf8a;--p:#16a34a;--p2:#22c55e;--p3:rgba(34,197,94,.18);--b:#1d4ed8;--b2:#60a5fa;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-thumb{background:rgba(34,197,94,.5);border-radius:2px}
+.orb{position:fixed;border-radius:50%;filter:blur(150px);pointer-events:none;z-index:0}
+.orb1{width:800px;height:800px;background:radial-gradient(circle,rgba(34,197,94,.14),transparent 70%);top:-300px;right:-200px}
+.orb2{width:600px;height:600px;background:radial-gradient(circle,rgba(29,78,216,.09),transparent 70%);bottom:-200px;left:-100px}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(4,8,4,.88);backdrop-filter:blur(40px);border-bottom:1px solid var(--border);padding:0 32px}
+.nav-in{max-width:1100px;margin:0 auto;height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:900;font-size:20px;letter-spacing:-.04em}
+.logo-mark svg{width:28px;height:28px}
+.grad{background:linear-gradient(135deg,#22d3ee,#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cr-pill{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700}
+.main{max-width:1100px;margin:0 auto;padding:96px 32px 60px;position:relative;z-index:2}
+.hero-sec{text-align:center;padding:40px 0 60px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.26);color:#22c55e;padding:7px 18px;border-radius:100px;font-size:11px;font-weight:700;margin-bottom:24px;letter-spacing:.08em;text-transform:uppercase}
+.bdot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.7)}}
+h1{font-size:clamp(38px,5vw,72px);font-weight:900;line-height:.95;letter-spacing:-.05em;margin-bottom:20px}
+.sub{color:#7abf8a;font-size:18px;line-height:1.65;max-width:520px;margin:0 auto 40px}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:60px}
+.how-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;transition:all .3s}
+.how-card:hover{border-color:var(--border2);background:rgba(34,197,94,.04);transform:translateY(-4px)}
+.how-num{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;margin:0 auto 16px}
+.how-title{font-size:16px;font-weight:800;margin-bottom:8px}
+.how-desc{font-size:13px;color:#7abf8a;line-height:1.6}
+.my-ref-box{background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(29,78,216,.05));border:1px solid rgba(34,197,94,.3);border-radius:24px;padding:36px;text-align:center;margin-bottom:40px}
+.ref-lbl{font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px}
+.ref-code-big{font-size:clamp(28px,4vw,42px);font-weight:900;color:#22c55e;letter-spacing:6px;font-family:monospace;margin-bottom:20px}
+.ref-link-box{background:rgba(0,0,0,.5);border:1px dashed rgba(34,197,94,.35);border-radius:12px;padding:12px 20px;font-size:13px;color:#7abf8a;margin-bottom:20px;word-break:break-all}
+.share-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.share-btn{padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:Sora,sans-serif;transition:all .3s}
+.share-copy{background:linear-gradient(135deg,#22c55e,#1d4ed8);color:#fff}
+.share-wa{background:#25D366;color:#fff}
+.share-tw{background:#1DA1F2;color:#fff}
+.share-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.earnings-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:24px;padding:36px;margin-bottom:40px}
+.earn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:24px}
+.earn-card{background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.15);border-radius:14px;padding:20px;text-align:center}
+.earn-val{font-size:28px;font-weight:900;background:linear-gradient(135deg,#22c55e,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.earn-lbl{font-size:11px;color:#7abf8a;text-transform:uppercase;letter-spacing:2px;font-weight:700}
+.leaderboard{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:24px;overflow:hidden;margin-bottom:40px}
+.lb-header{padding:24px 28px;border-bottom:1px solid var(--border)}
+.lb-title{font-size:18px;font-weight:800}
+.lb-row{display:grid;grid-template-columns:48px 1fr 80px 80px;align-items:center;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s;gap:12px}
+.lb-row:hover{background:rgba(34,197,94,.03)}
+.lb-row.me{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.15)}
+.lb-rank{font-size:18px;font-weight:900;text-align:center}
+.rank-1{color:#fbbf24}.rank-2{color:#94a3b8}.rank-3{color:#b45309}
+.lb-name{font-size:14px;font-weight:600}
+.lb-refs{font-size:13px;font-weight:700;color:#22c55e;text-align:right}
+.lb-cr{font-size:13px;font-weight:700;color:#60a5fa;text-align:right}
+.rewards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:40px}
+.reward-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;gap:14px;align-items:flex-start;transition:all .3s}
+.reward-card:hover{border-color:var(--border2);background:rgba(34,197,94,.04)}
+.reward-icon{font-size:28px;flex-shrink:0}
+.reward-title{font-size:14px;font-weight:800;margin-bottom:4px}
+.reward-desc{font-size:12px;color:#7abf8a;line-height:1.5}
+.sect-title{font-size:20px;font-weight:800;margin-bottom:20px;letter-spacing:-.02em}
+.loading{text-align:center;padding:40px;color:#7abf8a;font-size:14px}
+@media(max-width:768px){.main{padding:80px 16px 40px}.how-grid{grid-template-columns:1fr}.share-btns{flex-direction:column}.lb-row{grid-template-columns:40px 1fr 60px;}.lb-cr{display:none}}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div><div class="orb orb2"></div>
+
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="index.html">
+      <div class="logo-mark"><svg viewBox="0 0 30 30" fill="none"><polygon points="15,2 27,9 27,21 15,28 3,21 3,9" fill="url(#lg)"/><defs><linearGradient id="lg" x1="3" y1="3" x2="27" y2="27"><stop offset="0%" stop-color="#22d3ee"/><stop offset="50%" stop-color="#e879f9"/><stop offset="100%" stop-color="#818cf8"/></linearGradient></defs></svg></div>
+      Vid<span class="grad">AI</span>
+    </a>
+    <div style="display:flex;gap:12px;align-items:center">
+      <a href="dashboard.html" style="color:#7abf8a;text-decoration:none;font-size:13px;font-weight:600">Dashboard</a>
+      <span class="cr-pill" id="crDisplay">— cr</span>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="hero-sec">
+    <div class="badge"><span class="bdot"></span>Referral Program</div>
+    <h1>Refer <span class="grad">& Earn</span><br>Free Credits</h1>
+    <p class="sub">Apne dosto ko VidAI se milao — dono ko <strong style="color:#22c55e">100 credits</strong> milenge bilkul free!</p>
+  </div>
+
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">1</div>
+      <div class="how-title">Apna Link Share Karo</div>
+      <div class="how-desc">Neeche apna referral link copy karo aur WhatsApp, Instagram ya kisi bhi jagah share karo</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">2</div>
+      <div class="how-title">Dost Sign Up Kare</div>
+      <div class="how-desc">Jab tera dost tere link se sign up kare aur pehli video banaye</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">3</div>
+      <div class="how-title">Dono Ko Credits Milenge</div>
+      <div class="how-desc">Tujhe 100 cr milenge. Tere dost ko bhi 100 cr milenge. Win-win!</div>
+    </div>
+  </div>
+
+  <div id="myRefBox">
+    <div class="loading">Loading...</div>
+  </div>
+
+  <div class="sect-title">Teri Earnings</div>
+  <div class="earnings-box">
+    <div style="color:#7abf8a;font-size:13px;margin-bottom:8px">Referral se kitna kamaya</div>
+    <div class="earn-grid">
+      <div class="earn-card"><div class="earn-val" id="totalRefs">0</div><div class="earn-lbl">Total Referrals</div></div>
+      <div class="earn-card"><div class="earn-val" id="earnedCr">0 cr</div><div class="earn-lbl">Credits Earned</div></div>
+      <div class="earn-card"><div class="earn-val" id="pendingRefs">0</div><div class="earn-lbl">Pending</div></div>
+      <div class="earn-card"><div class="earn-val" id="thisMonthRefs">0</div><div class="earn-lbl">This Month</div></div>
+    </div>
+  </div>
+
+  <div class="sect-title">🏆 Leaderboard</div>
+  <div class="leaderboard">
+    <div class="lb-header">
+      <div class="lb-title">Top Referrers — This Month</div>
+    </div>
+    <div style="display:grid;grid-template-columns:48px 1fr 80px 80px;padding:10px 28px;gap:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+      <div style="font-size:10px;font-weight:700;color:#3d5c45;text-transform:uppercase;letter-spacing:2px">Rank</div>
+      <div style="font-size:10px;font-weight:700;color:#3d5c45;text-transform:uppercase;letter-spacing:2px">Creator</div>
+      <div style="font-size:10px;font-weight:700;color:#3d5c45;text-transform:uppercase;letter-spacing:2px;text-align:right">Refs</div>
+      <div style="font-size:10px;font-weight:700;color:#3d5c45;text-transform:uppercase;letter-spacing:2px;text-align:right">Credits</div>
+    </div>
+    <div id="leaderboard"><div class="loading">Loading leaderboard...</div></div>
+  </div>
+
+  <div class="sect-title">🎁 Reward Tiers</div>
+  <div class="rewards-grid">
+    <div class="reward-card"><div class="reward-icon">🥉</div><div><div class="reward-title">5 Referrals — 500 Bonus cr</div><div class="reward-desc">Pehle 5 referrals pe special bonus credits</div></div></div>
+    <div class="reward-card"><div class="reward-icon">🥈</div><div><div class="reward-title">10 Referrals — 1,500 Bonus cr</div><div class="reward-desc">Plus exclusive "Silver Creator" badge</div></div></div>
+    <div class="reward-card"><div class="reward-icon">🥇</div><div><div class="reward-title">25 Referrals — 5,000 Bonus cr</div><div class="reward-desc">Gold Creator badge + priority support</div></div></div>
+    <div class="reward-card"><div class="reward-icon">💎</div><div><div class="reward-title">50 Referrals — Free Pro Plan</div><div class="reward-desc">1 mahine ke liye Pro plan bilkul free</div></div></div>
+  </div>
+</main>
+
+<script>
+const SUPABASE_URL='https://higufnzhndyvuvnextqt.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpZ3VmbnpobmR5dnV2bmV4dHF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NDEzNDksImV4cCI6MjA5MTAxNzM0OX0.KjUPLjGUDl7ifC1Og1IRFB49-7TK4-iirBAt4SOUJns';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null;
+
+async function init(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){
+    document.getElementById('myRefBox').innerHTML=`<div style="text-align:center;padding:40px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;margin-bottom:40px"><div style="font-size:36px;margin-bottom:12px">🔒</div><p style="color:#7abf8a;margin-bottom:16px">Referral link dekhne ke liye login karo</p><a href="index.html" style="background:linear-gradient(135deg,#16a34a,#1d4ed8);color:#fff;padding:12px 28px;border-radius:11px;text-decoration:none;font-weight:700;font-size:14px">Login / Sign Up</a></div>`;
+    loadLeaderboard();
+    return;
+  }
+  currentUser=session.user;
+  const{data:profile}=await sb.from('profiles').select('credits,referral_count,credits_earned').eq('id',currentUser.id).single();
+  if(profile){
+    document.getElementById('crDisplay').textContent=(profile.credits||0)+' cr';
+    document.getElementById('totalRefs').textContent=profile.referral_count||0;
+    document.getElementById('earnedCr').textContent=(profile.credits_earned||0)+' cr';
+  }
+  renderMyBox();
+  loadLeaderboard();
+}
+
+function renderMyBox(){
+  const refCode='VIDAI'+currentUser.id.substring(0,6).toUpperCase();
+  const refLink=`${window.location.origin}/index.html?ref=${refCode}`;
+  document.getElementById('myRefBox').innerHTML=`
+    <div class="my-ref-box">
+      <div class="ref-lbl">Tera Referral Code</div>
+      <div class="ref-code-big">${refCode}</div>
+      <div class="ref-link-box" id="refLinkDisplay">${refLink}</div>
+      <div class="share-btns">
+        <button class="share-btn share-copy" onclick="copyLink('${refLink}')">📋 Link Copy Karo</button>
+        <button class="share-btn share-wa" onclick="shareWA('${refLink}')">💬 WhatsApp Share</button>
+        <button class="share-btn share-tw" onclick="shareTW('${refLink}')">🐦 Twitter Share</button>
+      </div>
+    </div>`;
+}
+
+function copyLink(link){ navigator.clipboard.writeText(link).then(()=>alert('✅ Referral link copy ho gaya!')); }
+function shareWA(link){ window.open(`https://wa.me/?text=${encodeURIComponent('Bhai VidAI try kar — India ka #1 AI Video Platform! Mere link se join kar, dono ko 100 free credits milenge 🎬\n\n'+link)}`) }
+function shareTW(link){ window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('Bhai VidAI try kar — AI Video platform! Mere link se join kar, dono ko 100 free credits 🎬 '+link)}`) }
+
+async function loadLeaderboard(){
+  // Load top referrers from profiles table
+  const{data}=await sb.from('profiles').select('referral_count,credits_earned,id').order('referral_count',{ascending:false}).limit(10);
+  const lb=document.getElementById('leaderboard');
+  if(!data||!data.length){ lb.innerHTML='<div class="loading">Abhi koi leaderboard data nahi hai</div>'; return; }
+  const rankEmojis=['🥇','🥈','🥉'];
+  lb.innerHTML=data.map((p,i)=>{
+    const isMe=currentUser&&p.id===currentUser.id;
+    const rankDisplay=i<3?`<span class="rank-${i+1}">${rankEmojis[i]}</span>`:`<span style="color:#3d5c45">#${i+1}</span>`;
+    const nameDisplay='Creator···'+p.id.substring(0,4).toUpperCase();
+    return `<div class="lb-row${isMe?' me':''}">
+      <div class="lb-rank">${rankDisplay}</div>
+      <div class="lb-name">${nameDisplay}${isMe?' <span style="font-size:10px;color:#22c55e">(You)</span>':''}</div>
+      <div class="lb-refs">${p.referral_count||0} refs</div>
+      <div class="lb-cr">${(p.credits_earned||0).toLocaleString()} cr</div>
+    </div>`;
+  }).join('');
+}
+
+// Handle referral on signup (check URL param)
+const urlRef = new URLSearchParams(location.search).get('ref');
+if(urlRef) localStorage.setItem('vidai_ref', urlRef);
+
+init();
+</script>
+</body>
+</html>
