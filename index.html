@@ -1165,7 +1165,7 @@ async function generateVideo() {
   const prompt = document.getElementById('promptArea')?.value || '';
   if (!prompt.trim()) { alert('Prompt likho pehle!'); return; }
   if (!currentUser) { openModal('login'); return; }
-  const tool = document.getElementById('toolDropLabel')?.textContent || 'Text to Video';
+  const tool = cT || 'ttv';
   const genBtn = document.querySelector('[onclick*="generateVideo"]');
   const previewBox = document.querySelector('.gen-preview-box');
   if (genBtn) { genBtn.textContent = '⏳ Generating...'; genBtn.disabled = true; }
@@ -1174,7 +1174,7 @@ async function generateVideo() {
     const res = await fetch('/.netlify/functions/generate-video', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, tool, userId: currentUser.id })
+      body: JSON.stringify({ prompt, tool: cT || 'ttv', quality: cQ || '1080p', duration: parseInt(cD) || 10, userId: currentUser.id })
     });
     const data = await res.json();
     if (!data.success) {
