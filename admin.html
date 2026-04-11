@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — VidAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#040808;--border:rgba(34,197,94,.1);--border2:rgba(34,197,94,.22);--text:#f0fff4;--muted:#3d5c45;--muted2:#7abf8a;--p:#16a34a;--p2:#22c55e;--p3:rgba(34,197,94,.18);--b:#1d4ed8;--b2:#60a5fa;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-thumb{background:rgba(34,197,94,.5);border-radius:2px}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(4,8,4,.95);border-bottom:1px solid rgba(248,113,113,.2);padding:0 32px}
+.nav-in{max-width:1400px;margin:0 auto;height:60px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:900;font-size:18px;text-decoration:none;color:#f0fff4;letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+.grad{background:linear-gradient(135deg,#22d3ee,#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.admin-badge{background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.35);color:#f87171;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px}
+.main{max-width:1400px;margin:0 auto;padding:80px 32px 60px;display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+.sidebar{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:18px;padding:16px;position:sticky;top:80px}
+.side-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;cursor:pointer;color:#7abf8a;font-size:13px;font-weight:600;transition:all .2s;text-decoration:none;margin-bottom:4px}
+.side-item:hover,.side-item.active{background:rgba(34,197,94,.1);color:#22c55e}
+.side-item .si{font-size:16px}
+.content{min-width:0}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:22px;transition:all .3s}
+.stat-card:hover{border-color:var(--border2)}
+.stat-icon{font-size:22px;margin-bottom:10px}
+.stat-val{font-size:28px;font-weight:900;background:linear-gradient(135deg,#22c55e,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:11px;color:#7abf8a;text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+.stat-sub{font-size:11px;color:#3d5c45;margin-top:4px}
+.section{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:18px;margin-bottom:24px;overflow:hidden}
+.sec-hd{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sec-hd h2{font-size:16px;font-weight:800}
+.sec-body{padding:0}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 20px;text-align:left;font-size:10px;font-weight:700;color:#3d5c45;text-transform:uppercase;letter-spacing:2px;background:rgba(0,0,0,.2)}
+td{padding:12px 20px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:hover td{background:rgba(34,197,94,.03)}
+tr:last-child td{border-bottom:none}
+.badge{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700}
+.badge-free{background:rgba(34,197,94,.1);color:#22c55e}
+.badge-good{background:rgba(96,165,250,.1);color:#60a5fa}
+.badge-pro{background:rgba(251,191,36,.1);color:#fbbf24}
+.badge-premium{background:rgba(232,121,249,.1);color:#e879f9}
+.badge-ok{background:rgba(34,197,94,.1);color:#22c55e}
+.badge-fail{background:rgba(248,113,113,.1);color:#f87171}
+.badge-proc{background:rgba(251,191,36,.1);color:#fbbf24}
+.action-btn{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#22c55e;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:Sora,sans-serif;transition:all .2s}
+.action-btn:hover{background:rgba(34,197,94,.2)}
+.action-btn.danger{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.25);color:#f87171}
+.action-btn.danger:hover{background:rgba(248,113,113,.2)}
+.search-box{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;padding:8px 14px;color:#f0fff4;font-size:13px;font-family:Sora,sans-serif;outline:none;width:240px}
+.search-box:focus{border-color:rgba(34,197,94,.4)}
+.add-cr-form{display:flex;gap:8px;align-items:center}
+.cr-input{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;padding:8px 14px;color:#f0fff4;font-size:13px;font-family:Sora,sans-serif;outline:none;width:120px}
+.cr-input:focus{border-color:rgba(34,197,94,.4)}
+.chart-bar-wrap{padding:24px}
+.chart-label{font-size:11px;color:#7abf8a;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between}
+.chart-bar-bg{height:8px;background:rgba(255,255,255,.06);border-radius:100px;margin-bottom:14px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.login-gate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;gap:16px}
+.login-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:380px;width:100%}
+.pw-input{width:100%;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:11px;padding:12px 16px;color:#f0fff4;font-size:16px;font-family:Sora,sans-serif;outline:none;margin-bottom:14px;letter-spacing:4px}
+.pw-input:focus{border-color:rgba(34,197,94,.4)}
+.pw-btn{width:100%;background:linear-gradient(135deg,#16a34a,#1d4ed8);border:none;color:#fff;padding:13px;border-radius:11px;font-size:15px;font-weight:700;font-family:Sora,sans-serif;cursor:pointer}
+.loading{text-align:center;padding:40px;color:#7abf8a}
+@media(max-width:900px){.main{grid-template-columns:1fr}.sidebar{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="index.html">Vid<span class="grad">AI</span></a>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="admin-badge">🔐 Admin Panel</span>
+      <span id="adminEmail" style="font-size:12px;color:#7abf8a"></span>
+    </div>
+  </div>
+</nav>
+
+<!-- PASSWORD GATE -->
+<div id="pwGate" class="login-gate" style="display:flex;padding-top:60px">
+  <div class="login-box">
+    <div style="font-size:40px;margin-bottom:16px">🔐</div>
+    <h2 style="font-size:22px;font-weight:900;margin-bottom:6px">Admin Access</h2>
+    <p style="color:#7abf8a;font-size:13px;margin-bottom:24px">Password dalo to continue karo</p>
+    <input type="password" class="pw-input" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPW()">
+    <button class="pw-btn" onclick="checkPW()">Enter Admin Panel</button>
+    <div id="pwErr" style="color:#f87171;font-size:12px;margin-top:12px;display:none">❌ Galat password</div>
+  </div>
+</div>
+
+<!-- ADMIN CONTENT -->
+<div id="adminContent" style="display:none">
+  <div class="main">
+    <div class="sidebar">
+      <a class="side-item active" onclick="showSection('overview')"><span class="si">📊</span> Overview</a>
+      <a class="side-item" onclick="showSection('users')"><span class="si">👥</span> Users</a>
+      <a class="side-item" onclick="showSection('videos')"><span class="si">🎬</span> Videos</a>
+      <a class="side-item" onclick="showSection('revenue')"><span class="si">💰</span> Revenue</a>
+      <a class="side-item" onclick="showSection('credits')"><span class="si">💳</span> Credits</a>
+      <hr style="border:none;border-top:1px solid var(--border);margin:10px 0">
+      <a class="side-item" href="index.html"><span class="si">🏠</span> Homepage</a>
+    </div>
+
+    <div class="content">
+      <!-- OVERVIEW -->
+      <div id="sec-overview">
+        <div style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;letter-spacing:3px;margin-bottom:6px">Admin Panel</div>
+          <h1 style="font-size:28px;font-weight:900;letter-spacing:-.03em">Overview</h1>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val" id="totalUsers">—</div><div class="stat-lbl">Total Users</div><div class="stat-sub" id="newToday">— new today</div></div>
+          <div class="stat-card"><div class="stat-icon">🎬</div><div class="stat-val" id="totalVideos">—</div><div class="stat-lbl">Videos Made</div><div class="stat-sub" id="videosToday">— today</div></div>
+          <div class="stat-card"><div class="stat-icon">💳</div><div class="stat-val" id="totalCrUsed">—</div><div class="stat-lbl">Credits Used</div><div class="stat-sub">All time</div></div>
+          <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val" id="totalRevenue">—</div><div class="stat-lbl">Est. Revenue</div><div class="stat-sub" id="revToday">— today</div></div>
+          <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-val" id="failedVideos">—</div><div class="stat-lbl">Failed Videos</div><div class="stat-sub">Auto-refunded</div></div>
+          <div class="stat-card"><div class="stat-icon">🎁</div><div class="stat-val" id="totalReferrals">—</div><div class="stat-lbl">Referrals</div><div class="stat-sub">Total</div></div>
+        </div>
+
+        <div class="section">
+          <div class="sec-hd"><h2>📈 Tool Usage (This Month)</h2></div>
+          <div class="chart-bar-wrap" id="toolChart"><div class="loading">Loading...</div></div>
+        </div>
+
+        <div class="section">
+          <div class="sec-hd"><h2>🕐 Recent Activity</h2></div>
+          <table><thead><tr><th>User</th><th>Tool</th><th>Quality</th><th>Credits</th><th>Status</th><th>Time</th></tr></thead>
+          <tbody id="recentActivity"><tr><td colspan="6" style="text-align:center;color:#7abf8a;padding:30px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div id="sec-users" style="display:none">
+        <div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <h1 style="font-size:28px;font-weight:900;letter-spacing:-.03em">Users</h1>
+          <input type="text" class="search-box" placeholder="🔍 Email search..." oninput="filterUsers(this.value)">
+        </div>
+        <div class="section">
+          <table><thead><tr><th>Email</th><th>Credits</th><th>Videos</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="usersTable"><tr><td colspan="5" style="text-align:center;color:#7abf8a;padding:30px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VIDEOS -->
+      <div id="sec-videos" style="display:none">
+        <h1 style="font-size:28px;font-weight:900;letter-spacing:-.03em;margin-bottom:20px">All Videos</h1>
+        <div class="section">
+          <table><thead><tr><th>User</th><th>Tool</th><th>Quality</th><th>Credits</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="videosTable"><tr><td colspan="6" style="text-align:center;color:#7abf8a;padding:30px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REVENUE -->
+      <div id="sec-revenue" style="display:none">
+        <h1 style="font-size:28px;font-weight:900;letter-spacing:-.03em;margin-bottom:20px">Revenue</h1>
+        <div class="stats-grid" style="margin-bottom:24px">
+          <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val" id="rev30d">—</div><div class="stat-lbl">Last 30 Days</div></div>
+          <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-val" id="revOrders">—</div><div class="stat-lbl">Total Orders</div></div>
+          <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-val" id="revAvg">—</div><div class="stat-lbl">Avg Order</div></div>
+        </div>
+        <div class="section">
+          <div class="sec-hd"><h2>Plan Breakdown</h2></div>
+          <div class="chart-bar-wrap" id="planChart"><div class="loading">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- CREDITS MANAGEMENT -->
+      <div id="sec-credits" style="display:none">
+        <h1 style="font-size:28px;font-weight:900;letter-spacing:-.03em;margin-bottom:20px">Credits Management</h1>
+        <div class="section" style="margin-bottom:24px">
+          <div class="sec-hd"><h2>Add Credits to User</h2></div>
+          <div style="padding:24px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+            <div>
+              <div style="font-size:11px;color:#7abf8a;font-weight:700;margin-bottom:6px">User Email</div>
+              <input type="email" class="cr-input" id="crEmail" placeholder="user@email.com" style="width:220px">
+            </div>
+            <div>
+              <div style="font-size:11px;color:#7abf8a;font-weight:700;margin-bottom:6px">Credits</div>
+              <input type="number" class="cr-input" id="crAmount" placeholder="100" min="1" max="50000">
+            </div>
+            <button class="action-btn" onclick="addCredits()" style="padding:8px 20px;font-size:13px">+ Add Credits</button>
+          </div>
+          <div id="crMsg" style="padding:0 24px 20px;font-size:13px;display:none"></div>
+        </div>
+        <div class="section">
+          <div class="sec-hd"><h2>Credit Transaction Log</h2></div>
+          <table><thead><tr><th>User</th><th>Amount</th><th>Type</th><th>Date</th></tr></thead>
+          <tbody id="crLog"><tr><td colspan="4" style="text-align:center;color:#7abf8a;padding:30px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Admin password (change this to something secure)
+const ADMIN_PASSWORD = 'vidai@admin2025';
+
+const SUPABASE_URL='https://higufnzhndyvuvnextqt.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpZ3VmbnpobmR5dnV2bmV4dHF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NDEzNDksImV4cCI6MjA5MTAxNzM0OX0.KjUPLjGUDl7ifC1Og1IRFB49-7TK4-iirBAt4SOUJns';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const toolNames={ttv:'Text to Video',itv:'Image to Video',stv:'Script to Video',pa:'Photo Animate',tp:'Talking Photo',vtv:'Video to Video',fs:'Face Swap',ls:'Lip Sync',ac:'Avatar Create',ta:'Talking Avatar',dg:'Dance Generator',se:'Sound Effects',br:'Background Remove',aie:'AI Enhance',cap:'Auto Captions',stt:'Style Transfer'};
+let allUsers=[];
+
+function checkPW(){
+  const pw=document.getElementById('pwInput').value;
+  if(pw===ADMIN_PASSWORD || sessionStorage.getItem('vidai_admin')==='1'){
+    sessionStorage.setItem('vidai_admin','1');
+    document.getElementById('pwGate').style.display='none';
+    document.getElementById('adminContent').style.display='block';
+    loadAll();
+  } else {
+    document.getElementById('pwErr').style.display='block';
+    setTimeout(()=>document.getElementById('pwErr').style.display='none',2000);
+  }
+}
+
+// Auto-check session
+if(sessionStorage.getItem('vidai_admin')==='1'){
+  document.getElementById('pwGate').style.display='none';
+  document.getElementById('adminContent').style.display='block';
+}
+
+function showSection(s){
+  document.querySelectorAll('[id^=sec-]').forEach(el=>el.style.display='none');
+  document.getElementById('sec-'+s).style.display='block';
+  document.querySelectorAll('.side-item').forEach(el=>el.classList.remove('active'));
+  event.target.closest('.side-item').classList.add('active');
+  if(s==='users') loadUsers();
+  if(s==='videos') loadVideos();
+  if(s==='revenue') loadRevenue();
+  if(s==='credits') loadCrLog();
+}
+
+async function loadAll(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const todayISO=today.toISOString();
+
+  // Total users
+  const{count:uc}=await sb.from('profiles').select('id',{count:'exact',head:true});
+  document.getElementById('totalUsers').textContent=(uc||0).toLocaleString();
+
+  // New today
+  const{count:nc}=await sb.from('profiles').select('id',{count:'exact',head:true}).gte('created_at',todayISO);
+  document.getElementById('newToday').textContent=(nc||0)+' new today';
+
+  // Videos
+  const{count:vc}=await sb.from('video_history').select('id',{count:'exact',head:true});
+  document.getElementById('totalVideos').textContent=(vc||0).toLocaleString();
+
+  const{count:vt}=await sb.from('video_history').select('id',{count:'exact',head:true}).gte('created_at',todayISO);
+  document.getElementById('videosToday').textContent=(vt||0)+' today';
+
+  // Credits used
+  const{data:crData}=await sb.from('video_history').select('credits_used');
+  const totalCr=(crData||[]).reduce((a,v)=>a+(v.credits_used||0),0);
+  document.getElementById('totalCrUsed').textContent=totalCr.toLocaleString();
+
+  // Failed
+  const{count:fc}=await sb.from('video_history').select('id',{count:'exact',head:true}).eq('status','failed');
+  document.getElementById('failedVideos').textContent=fc||0;
+
+  // Referrals
+  const{data:refData}=await sb.from('profiles').select('referral_count');
+  const totalRef=(refData||[]).reduce((a,p)=>a+(p.referral_count||0),0);
+  document.getElementById('totalReferrals').textContent=totalRef;
+
+  // Est revenue (credits_used * avg price per cr ~₹0.33)
+  const estRev=Math.round(totalCr*0.33);
+  document.getElementById('totalRevenue').textContent='₹'+estRev.toLocaleString();
+
+  loadToolChart();
+  loadRecentActivity();
+}
+
+async function loadToolChart(){
+  const{data}=await sb.from('video_history').select('tool_used');
+  const counts={};
+  (data||[]).forEach(v=>{ counts[v.tool_used]=(counts[v.tool_used]||0)+1; });
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const max=sorted[0]?.[1]||1;
+  const colors=['#22c55e','#60a5fa','#e879f9','#fbbf24','#2dd4bf','#f87171','#818cf8','#fb923c'];
+  document.getElementById('toolChart').innerHTML=sorted.map(([tool,count],i)=>`
+    <div class="chart-label"><span>${toolNames[tool]||tool}</span><span style="color:#22c55e">${count}</span></div>
+    <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(count/max*100).toFixed(1)}%;background:${colors[i%colors.length]}"></div></div>
+  `).join('')||'<div style="color:#7abf8a;font-size:13px">Koi data nahi</div>';
+}
+
+async function loadRecentActivity(){
+  const{data}=await sb.from('video_history').select('*').order('created_at',{ascending:false}).limit(20);
+  const tbody=document.getElementById('recentActivity');
+  if(!data?.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#7abf8a;padding:20px">No activity</td></tr>'; return; }
+  tbody.innerHTML=data.map(v=>{
+    const date=v.created_at?new Date(v.created_at).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    const isUrl=v.video_url?.startsWith('http');
+    return `<tr>
+      <td style="font-size:12px;color:#7abf8a">${v.user_id?.substring(0,8)||'—'}…</td>
+      <td><span style="font-size:12px">${toolNames[v.tool_used]||v.tool_used||'—'}</span></td>
+      <td><span class="badge badge-${v.quality||'free'}">${v.quality||'free'}</span></td>
+      <td style="color:#22c55e;font-weight:700">${v.credits_used||'—'}</td>
+      <td><span class="badge ${isUrl?'badge-ok':'badge-proc'}">${isUrl?'✓ Done':'Processing'}</span></td>
+      <td style="font-size:11px;color:#3d5c45">${date}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadUsers(){
+  const{data}=await sb.from('profiles').select('*').order('created_at',{ascending:false}).limit(100);
+  allUsers=data||[];
+  renderUsers(allUsers);
+}
+
+function filterUsers(q){
+  const filtered=allUsers.filter(u=>u.email?.toLowerCase().includes(q.toLowerCase()));
+  renderUsers(filtered);
+}
+
+function renderUsers(users){
+  document.getElementById('usersTable').innerHTML=users.map(u=>{
+    const date=u.created_at?new Date(u.created_at).toLocaleDateString('en-IN'):'—';
+    return `<tr>
+      <td><div style="font-size:13px">${u.email||u.id?.substring(0,12)+'…'}</div></td>
+      <td style="font-weight:700;color:#22c55e">${(u.credits||0).toLocaleString()} cr</td>
+      <td style="color:#7abf8a">${u.video_count||'—'}</td>
+      <td style="font-size:12px;color:#7abf8a">${date}</td>
+      <td style="display:flex;gap:6px">
+        <button class="action-btn" onclick="quickAddCr('${u.id}','${u.email||''}')">+ Credits</button>
+        <button class="action-btn danger" onclick="banUser('${u.id}')">Ban</button>
+      </td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:#7abf8a;padding:20px">No users</td></tr>';
+}
+
+async function loadVideos(){
+  const{data}=await sb.from('video_history').select('*').order('created_at',{ascending:false}).limit(100);
+  const tbody=document.getElementById('videosTable');
+  if(!data?.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#7abf8a;padding:20px">No videos</td></tr>'; return; }
+  tbody.innerHTML=data.map(v=>{
+    const date=v.created_at?new Date(v.created_at).toLocaleDateString('en-IN'):'—';
+    const isUrl=v.video_url?.startsWith('http');
+    return `<tr>
+      <td style="font-size:12px;color:#7abf8a">${v.user_id?.substring(0,8)||'—'}…</td>
+      <td>${toolNames[v.tool_used]||v.tool_used||'—'}</td>
+      <td><span class="badge badge-${v.quality||'free'}">${v.quality||'free'}</span></td>
+      <td style="color:#22c55e;font-weight:700">${v.credits_used||'—'}</td>
+      <td><span class="badge ${isUrl?'badge-ok':'badge-proc'}">${isUrl?'Done':'Processing'}</span></td>
+      <td style="font-size:12px;color:#3d5c45">${date}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadRevenue(){
+  // Estimate from video_history credits_used
+  const{data}=await sb.from('video_history').select('credits_used,created_at');
+  const total=(data||[]).reduce((a,v)=>a+(v.credits_used||0),0);
+  const rev30days=new Date(); rev30days.setDate(rev30days.getDate()-30);
+  const recent=(data||[]).filter(v=>new Date(v.created_at)>rev30days).reduce((a,v)=>a+(v.credits_used||0),0);
+  document.getElementById('rev30d').textContent='₹'+Math.round(recent*0.33).toLocaleString();
+  document.getElementById('revOrders').textContent=(data||[]).length;
+  document.getElementById('revAvg').textContent='₹'+(data?.length?Math.round(total*0.33/data.length):0);
+
+  // Plan chart
+  const planCounts={starter:0,basic:0,pro:0,premium:0};
+  document.getElementById('planChart').innerHTML=Object.entries(planCounts).map(([plan,count],i)=>`
+    <div class="chart-label"><span>${plan.charAt(0).toUpperCase()+plan.slice(1)} (₹${['199','499','1299','2999'][i]})</span><span>${count}</span></div>
+    <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${count?'50':'0'}%;background:#22c55e"></div></div>
+  `).join('');
+}
+
+async function loadCrLog(){
+  // Load recent video_history as proxy for credit log
+  const{data}=await sb.from('video_history').select('user_id,credits_used,quality,created_at').order('created_at',{ascending:false}).limit(50);
+  const tbody=document.getElementById('crLog');
+  if(!data?.length){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#7abf8a;padding:20px">No data</td></tr>'; return; }
+  tbody.innerHTML=data.map(v=>{
+    const date=v.created_at?new Date(v.created_at).toLocaleDateString('en-IN'):'—';
+    return `<tr>
+      <td style="font-size:12px;color:#7abf8a">${v.user_id?.substring(0,10)||'—'}…</td>
+      <td style="color:#f87171;font-weight:700">-${v.credits_used||0} cr</td>
+      <td><span class="badge badge-${v.quality||'free'}">Video Gen</span></td>
+      <td style="font-size:12px;color:#3d5c45">${date}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function addCredits(){
+  const email=document.getElementById('crEmail').value.trim();
+  const amount=parseInt(document.getElementById('crAmount').value);
+  const msg=document.getElementById('crMsg');
+  if(!email||!amount){ msg.style.display='block'; msg.style.color='#f87171'; msg.textContent='❌ Email aur amount daalo'; return; }
+  
+  // Find user by email in auth
+  msg.style.display='block'; msg.style.color='#fbbf24'; msg.textContent='Processing...';
+  
+  // Update profiles table — user_id needed; find from profiles.email if stored
+  const{data:profile}=await sb.from('profiles').select('id').eq('email',email).single();
+  if(!profile){ msg.style.color='#f87171'; msg.textContent='❌ User nahi mila. Check karo email.'; return; }
+  
+  const{error}=await sb.from('profiles').update({credits:sb.rpc('increment',{x:amount})}).eq('id',profile.id);
+  if(error){ msg.style.color='#f87171'; msg.textContent='❌ Error: '+error.message; return; }
+  
+  msg.style.color='#22c55e'; msg.textContent=`✅ ${amount} credits add ho gaye ${email} ko!`;
+  document.getElementById('crEmail').value=''; document.getElementById('crAmount').value='';
+}
+
+function quickAddCr(userId, email){
+  const amount=prompt(`${email} ko kitne credits add karne hain?`);
+  if(!amount||isNaN(parseInt(amount))) return;
+  sb.from('profiles').select('credits').eq('id',userId).single().then(({data})=>{
+    const newCr=(data?.credits||0)+parseInt(amount);
+    sb.from('profiles').update({credits:newCr}).eq('id',userId).then(()=>{ alert(`✅ ${amount} credits add ho gaye!`); loadUsers(); });
+  });
+}
+
+async function banUser(userId){
+  if(!confirm('Ye user ban karna chahte ho?')) return;
+  await sb.from('profiles').update({banned:true}).eq('id',userId);
+  alert('User banned. (Make sure banned field exists in profiles table)');
+  loadUsers();
+}
+
+// Enter key for password
+document.addEventListener('keydown',function(e){ if(e.key==='Enter'&&document.getElementById('pwGate').style.display!=='none') checkPW(); });
+
+// Auto-load if session exists
+if(sessionStorage.getItem('vidai_admin')==='1') loadAll();
+</script>
+</body>
+</html>
