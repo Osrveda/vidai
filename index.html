@@ -22,8 +22,8 @@
   --r:12px;--r2:20px;--r3:28px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;overflow-x:hidden;cursor:none}
+html{scroll-behavior:smooth;overflow-x:hidden;max-width:100vw}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;overflow-x:hidden;cursor:none;max-width:100vw;width:100%}
 ::-webkit-scrollbar{width:2px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:rgba(34,197,94,.5);border-radius:2px}
@@ -237,7 +237,7 @@ body.cursor-hover #curR{width:44px;height:44px;border-color:rgba(232,121,249,.6)
 .m-card-btn{background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.35);color:var(--p2);padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:none;font-family:'Sora',sans-serif;opacity:0;transform:translateY(8px);transition:all .32s var(--ease);width:fit-content}
 .m-card:hover .m-card-btn{opacity:1;transform:none}
 .m-card-top{position:absolute;top:12px;left:12px;background:rgba(4,4,8,.72);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:4px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;z-index:2}
-.m-p9-16{aspect-ratio:9/16}.m-p4-5{aspect-ratio:4/5}.m-p1-1{aspect-ratio:1/1}.m-p16-9{aspect-ratio:16/9}.m-p3-4{aspect-ratio:3/4}
+.m-p9-16{aspect-ratio:9/16;background:linear-gradient(135deg,#0a1628,#1a0a28,#0a1a1a)}.m-p4-5{aspect-ratio:4/5;background:linear-gradient(135deg,#1a0a28,#0a1628,#280a1a)}.m-p1-1{aspect-ratio:1/1;background:linear-gradient(135deg,#0a1a0a,#1a1a0a,#0a0a1a)}.m-p16-9{aspect-ratio:16/9;background:linear-gradient(135deg,#0a0a1a,#1a0a0a,#0a1a1a)}.m-p3-4{aspect-ratio:3/4;background:linear-gradient(135deg,#1a0a1a,#0a1a0a,#0a0a1a)}
 .demo-sec{position:relative;z-index:2;overflow:hidden}
 .demo-inner{max-width:1360px;margin:0 auto;padding:130px 52px;display:grid;align-items:center;gap:80px}
 .demo-inner.lv{grid-template-columns:1.2fr 1fr}.demo-inner.rv{grid-template-columns:1fr 1.2fr}
@@ -606,13 +606,21 @@ body::before{content:'' !important;position:fixed !important;inset:0 !important;
 
       <!-- FIX 1: Clean textarea without stray tags -->
       <div style="position:relative">
-        <textarea class="gen-ta" id="promptArea" placeholder="Apna video describe karo... e.g. 'Bollywood actress dancing at golden hour'" style="padding-bottom:48px"></textarea>
-        <div style="position:absolute;bottom:10px;left:10px;right:10px;display:flex;gap:8px;align-items:center">
-          <label id="uploadLabel" style="cursor:pointer;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap">
-            📎 Photo/Video/Audio
-            <input type="file" id="fileUpload" accept="image/*,video/*,audio/*" style="display:none" onchange="handleFileUpload(this)">
+        <textarea class="gen-ta" id="promptArea" placeholder="Apna video describe karo... e.g. 'Bollywood actress dancing at golden hour'" style="padding-bottom:60px"></textarea>
+        <div style="position:absolute;bottom:10px;left:10px;right:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <label style="cursor:pointer;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.4);border-radius:8px;padding:6px 10px;font-size:11px;color:#67e8f9;display:flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600">
+            🖼️ Image
+            <input type="file" accept="image/*" style="display:none" onchange="handleFileUpload(this,'image')">
           </label>
-          <span id="fileName" style="font-size:11px;color:var(--p2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <label style="cursor:pointer;background:rgba(232,121,249,.12);border:1px solid rgba(232,121,249,.4);border-radius:8px;padding:6px 10px;font-size:11px;color:#f0abfc;display:flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600">
+            🎥 Video
+            <input type="file" accept="video/*" style="display:none" onchange="handleFileUpload(this,'video')">
+          </label>
+          <label style="cursor:pointer;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4);border-radius:8px;padding:6px 10px;font-size:11px;color:#fde68a;display:flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600">
+            🎵 Audio
+            <input type="file" accept="audio/*" style="display:none" onchange="handleFileUpload(this,'audio')">
+          </label>
+          <span id="fileName" style="font-size:11px;color:#67e8f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1"></span>
         </div>
       </div>
 
@@ -703,24 +711,35 @@ body::before{content:'' !important;position:fixed !important;inset:0 !important;
     <button type="button" class="btn-primary" onclick="openModal('signup')" style="padding:13px 28px;font-size:14px;flex-shrink:0">Start Creating →</button>
   </div>
   <div class="masonry-grid reveal">
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p9-16" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Text to Video</div><div class="m-card-ov"><div class="m-card-cat mcat-purple">Text to Video</div><div class="m-card-title">Neon City<br>AI Generation</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p4-5" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-woman-dancing-happy-1025-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Dance Generator</div><div class="m-card-ov"><div class="m-card-cat mcat-pink">Dance Generator</div><div class="m-card-title">Full Body Dance<br>from Any Photo</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p1-1" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-fire-burning-and-pulsating-in-slow-motion-37774-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Color Grading</div><div class="m-card-ov"><div class="m-card-cat mcat-orange">Color Grading</div><div class="m-card-title">Cinematic Color<br>AI Grading</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p16-9" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-portrait-of-a-young-woman-in-sunglasses-outdoors-3185-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Face Swap</div><div class="m-card-ov"><div class="m-card-cat mcat-blue">Face Swap</div><div class="m-card-title">Seamless Face<br>Replacement</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p3-4" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-young-woman-with-makeup-and-colored-neon-lights-4039-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Lip Sync</div><div class="m-card-ov"><div class="m-card-cat mcat-purple">Lip Sync</div><div class="m-card-title">AI Lip Sync<br>Any Language</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p16-9" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-slow-motion-slow-motion-close-up-shot-of-water-splashes-37-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Slow Motion</div><div class="m-card-ov"><div class="m-card-cat mcat-teal">Slow Motion</div><div class="m-card-title">Cinematic<br>240fps Slow Mo</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p9-16" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-stars-in-outer-space-1610-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Script to Video</div><div class="m-card-ov"><div class="m-card-cat mcat-blue">Script to Video</div><div class="m-card-title">Cinematic Space<br>Visual Story</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p1-1" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-a-girl-blowing-a-vape-smoke-394-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Style Transfer</div><div class="m-card-ov"><div class="m-card-cat mcat-orange">Style Transfer</div><div class="m-card-title">Anime · Painting<br>Any Art Style</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p4-5" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-man-playing-the-guitar-closeup-4114-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Voice Clone</div><div class="m-card-ov"><div class="m-card-cat mcat-blue">Voice Clone</div><div class="m-card-title">Clone Any Voice<br>in Seconds</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p16-9" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-network-background-34494-large.mp4" type="video/mp4"></video></div><div class="m-card-top">AI Enhance</div><div class="m-card-ov"><div class="m-card-cat mcat-teal">AI Enhance</div><div class="m-card-title">Upscale to 4K<br>Instantly</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p3-4" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-portrait-of-a-young-woman-in-sunglasses-outdoors-3185-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Talking Avatar</div><div class="m-card-ov"><div class="m-card-cat mcat-pink">Talking Avatar</div><div class="m-card-title">AI Avatar<br>Speaking Naturally</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
-    <div class="m-card" onclick="openModal('signup')"><div class="m-p4-5" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4" type="video/mp4"></video></div><div class="m-card-top">Image to Video</div><div class="m-card-ov"><div class="m-card-cat mcat-orange">Image to Video</div><div class="m-card-title">Static Image<br>→ Living Video</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p9-16" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/3045163/free-video-3045163.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4" type="video/mp4"><source src="https://www.pexels.com/video/3045163/download/" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(232,121,249,.1));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Text to Video</div><div class="m-card-ov"><div class="m-card-cat mcat-purple">Text to Video</div><div class="m-card-title">Neon City<br>AI Generation</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p4-5" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/2795750/free-video-2795750.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-woman-dancing-happy-1025-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,121,249,.1),rgba(251,191,36,.08));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Dance Generator</div><div class="m-card-ov"><div class="m-card-cat mcat-pink">Dance Generator</div><div class="m-card-title">Full Body Dance<br>from Any Photo</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p1-1" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/1093662/free-video-1093662.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-fire-burning-and-pulsating-in-slow-motion-37774-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(232,121,249,.08));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Color Grading</div><div class="m-card-ov"><div class="m-card-cat mcat-orange">Color Grading</div><div class="m-card-title">Cinematic Color<br>AI Grading</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p16-9" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/3224808/free-video-3224808.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-portrait-of-a-young-woman-in-sunglasses-outdoors-3185-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(34,211,238,.1),rgba(129,140,248,.08));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Face Swap</div><div class="m-card-ov"><div class="m-card-cat mcat-blue">Face Swap</div><div class="m-card-title">Seamless Face<br>Replacement</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p3-4" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/4763824/free-video-4763824.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-young-woman-with-makeup-and-colored-neon-lights-4039-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,121,249,.12),rgba(34,211,238,.08));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Lip Sync</div><div class="m-card-ov"><div class="m-card-cat mcat-purple">Lip Sync</div><div class="m-card-title">AI Lip Sync<br>Any Language</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p16-9" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/856555/free-video-856555.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-slow-motion-slow-motion-close-up-shot-of-water-splashes-37-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(34,211,238,.1),rgba(129,140,248,.06));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Slow Motion</div><div class="m-card-ov"><div class="m-card-cat mcat-teal">Slow Motion</div><div class="m-card-title">Cinematic<br>240fps Slow Mo</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p9-16" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/1851190/free-video-1851190.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-stars-in-outer-space-1610-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(129,140,248,.12),rgba(34,211,238,.08));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Script to Video</div><div class="m-card-ov"><div class="m-card-cat mcat-blue">Script to Video</div><div class="m-card-title">Cinematic Space<br>Visual Story</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p1-1" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/3296277/free-video-3296277.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-a-girl-blowing-a-vape-smoke-394-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(232,121,249,.08));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Style Transfer</div><div class="m-card-ov"><div class="m-card-cat mcat-orange">Style Transfer</div><div class="m-card-title">Anime · Painting<br>Any Art Style</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p4-5" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/2101804/free-video-2101804.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-man-playing-the-guitar-closeup-4114-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(129,140,248,.1));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Voice Clone</div><div class="m-card-ov"><div class="m-card-cat mcat-blue">Voice Clone</div><div class="m-card-title">Clone Any Voice<br>in Seconds</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p16-9" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/3129957/free-video-3129957.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-network-background-34494-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(129,140,248,.08));pointer-events:none;z-index:0"></div></div><div class="m-card-top">AI Enhance</div><div class="m-card-ov"><div class="m-card-cat mcat-teal">AI Enhance</div><div class="m-card-title">Upscale to 4K<br>Instantly</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p3-4" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/5548414/free-video-5548414.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-portrait-of-a-young-woman-in-sunglasses-outdoors-3185-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,121,249,.1),rgba(251,191,36,.06));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Talking Avatar</div><div class="m-card-ov"><div class="m-card-cat mcat-pink">Talking Avatar</div><div class="m-card-title">AI Avatar<br>Speaking Naturally</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
+
+    <div class="m-card" onclick="openModal('signup')"><div class="m-p4-5" style="position:relative;overflow:hidden"><video autoplay muted loop playsinline poster="https://images.pexels.com/videos/3045163/free-video-3045163.jpg" style="width:100%;height:100%;object-fit:cover;display:block"><source src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4" type="video/mp4"></video><div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(232,121,249,.08));pointer-events:none;z-index:0"></div></div><div class="m-card-top">Image to Video</div><div class="m-card-ov"><div class="m-card-cat mcat-orange">Image to Video</div><div class="m-card-title">Static Image<br>→ Living Video</div><button type="button" class="m-card-btn">Try Now →</button></div></div>
   </div>
 </div>
 
 <!-- CINEMATIC BANNER 2 -->
 <div class="cine-banner zone-blue">
-  <video autoplay muted loop playsinline><source src="https://assets.mixkit.co/videos/preview/mixkit-stars-in-outer-space-1610-large.mp4" type="video/mp4"></video>
+  <video autoplay muted loop playsinline><source src="https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-city-at-night-1166-large.mp4" type="video/mp4"><source src="https://assets.mixkit.co/videos/preview/mixkit-stars-in-outer-space-1610-large.mp4" type="video/mp4"></video>
   <div class="cb-overlay cb-overlay-blue"></div><div class="cb-color-blue"></div>
   <div class="cb-content right">
     <div class="cb-inner reveal-right">
@@ -1133,19 +1152,67 @@ async function signOut(){
 initAuth();
 
 // ═══ FIX 2: CLEAN FILE UPLOAD & GENERATE VIDEO FUNCTIONS ═══
-function handleFileUpload(input) {
+function handleFileUpload(input, type) {
   const file = input.files[0];
   if (file) {
     document.getElementById('fileName').textContent = '✅ ' + file.name;
     window.uploadedFile = file;
+    window.uploadedFileType = type;
   }
 }
 
-async function generateVideo() {   const prompt = document.getElementById('promptArea')?.value || '';   if (!prompt.trim()) { alert('Prompt likho pehle!'); return; }   if (!currentUser) { openModal('login'); return; }   const tool = document.getElementById('toolDropLabel')?.textContent || 'kling-video';   const btn = document.querySelector('[onclick="generateVideo()"]');   if (btn) { btn.textContent = '⏳ Generating...'; btn.disabled = true; }   try {     const res = await fetch('/.netlify/functions/generate-video', {       method: 'POST',       headers: { 'Content-Type': 'application/json' },       body: JSON.stringify({ prompt, tool, userId: currentUser.id })     });     const data = await res.json();     if (data.success) {       alert('✅ Video generation started! Task ID: ' + data.taskId);       await sb.from('video_history').insert({ user_id: currentUser.id, prompt, tool_used: tool, video_url: data.taskId || '' });     } else {       alert('❌ Error: ' + (data.error || 'Please try again'));     }   } catch (err) {     alert('❌ Network error. Please try again.');   }   if (btn) { btn.textContent = 'Generate →'; btn.disabled = false; } }
+async function generateVideo() {
   const prompt = document.getElementById('promptArea')?.value || '';
   if (!prompt.trim()) { alert('Prompt likho pehle!'); return; }
+  if (!currentUser) { openModal('login'); return; }
   const tool = document.getElementById('toolDropLabel')?.textContent || 'Text to Video';
-  alert('Request mili! Tool: ' + tool + ' | Prompt: ' + prompt);
+  const genBtn = document.querySelector('[onclick*="generateVideo"]');
+  const previewBox = document.querySelector('.gen-preview-box');
+  if (genBtn) { genBtn.textContent = '⏳ Generating...'; genBtn.disabled = true; }
+  if (previewBox) previewBox.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px"><div style="width:48px;height:48px;border:3px solid rgba(34,211,238,.3);border-top-color:#22d3ee;border-radius:50%;animation:spin 1s linear infinite"></div><div style="color:#22d3ee;font-size:13px;font-weight:600">Video ban raha hai...</div><div style="color:#6BA8C4;font-size:11px">18-30 seconds lagenge</div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  try {
+    const res = await fetch('/.netlify/functions/generate-video', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, tool, userId: currentUser.id })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      alert('❌ Error: ' + (data.error || 'Please try again'));
+      if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
+      if(previewBox) previewBox.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#f87171;font-size:13px">❌ Error: ' + (data.error||'Try again') + '</div>';
+      return;
+    }
+    const taskId = data.taskId;
+    await sb.from('video_history').insert({ user_id: currentUser.id, prompt, tool_used: tool, video_url: taskId });
+    let tries = 0;
+    const poll = setInterval(async () => {
+      tries++;
+      if (tries > 60) {
+        clearInterval(poll);
+        if(previewBox) previewBox.innerHTML = '<div style="color:#fbbf24;text-align:center;padding:20px;font-size:13px">⚠️ Timeout — Please check kie.ai logs</div>';
+        if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
+        return;
+      }
+      try {
+        const sr = await fetch('/.netlify/functions/check-video?taskId=' + taskId);
+        const sd = await sr.json();
+        if (sd.status === 'completed' && sd.videoUrl) {
+          clearInterval(poll);
+          if (previewBox) previewBox.innerHTML = `<video src="${sd.videoUrl}" controls autoplay style="width:100%;height:100%;border-radius:20px;object-fit:cover"></video><a href="${sd.videoUrl}" download="vidai-video.mp4" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;background:linear-gradient(135deg,#22d3ee,#e879f9);color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px">⬇️ Download Video</a>`;
+          await sb.from('video_history').update({ video_url: sd.videoUrl }).eq('user_id', currentUser.id).eq('video_url', taskId);
+          if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
+        } else if (sd.status === 'failed') {
+          clearInterval(poll);
+          if(previewBox) previewBox.innerHTML = '<div style="color:#f87171;text-align:center;padding:20px;font-size:13px">❌ Video generation failed. Try again.</div>';
+          if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
+        }
+      } catch(e) {}
+    }, 5000);
+  } catch (err) {
+    alert('❌ Network error. Please try again.');
+    if(genBtn){genBtn.textContent='Generate →';genBtn.disabled=false;}
+  }
 }
 
 // ═══ PAYMENT ═══
