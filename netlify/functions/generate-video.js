@@ -1,10 +1,13 @@
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
 
   let body;
-  try { body = JSON.parse(event.body); } catch { return { statusCode: 400, body: JSON.stringify({ success: false, error: 'Invalid JSON' }) }; }
+  try { body = JSON.parse(event.body); } 
+  catch { return { statusCode: 400, body: JSON.stringify({ success: false, error: 'Invalid JSON' }) }; }
 
-  const { prompt, tool, quality, duration, userId } = body;
+  const { prompt, userId } = body;
 
   if (!prompt || !prompt.trim()) {
     return { statusCode: 400, body: JSON.stringify({ success: false, error: 'Prompt required' }) };
@@ -12,46 +15,17 @@ exports.handler = async (event) => {
 
   const KIE_API_KEY = process.env.KIE_API_KEY;
   if (!KIE_API_KEY) {
-    return { statusCode: 500, body: JSON.stringify({ success: false, error: 'API key not configured' }) };
+    return { statusCode: 500, body: JSON.stringify({ success: false, error: 'API key not configured in Netlify' }) };
   }
 
-  // Map tool codes to kie.ai model names
-  const modelMap = {
-    ttv:  { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    stv:  { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    itv:  { modelName: 'kling-v2-master', taskType: 'image_to_video' },
-    pa:   { modelName: 'kling-v2-master', taskType: 'image_to_video' },
-    tp:   { modelName: 'kling-v2-master', taskType: 'image_to_video' },
-    vtv:  { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    fs:   { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    ls:   { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    dg:   { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    ac:   { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    ta:   { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    se:   { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    br:   { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    aie:  { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    or:   { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    cap:  { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-    stt:  { modelName: 'kling-v2-master', taskType: 'text_to_video' },
-  };
-
-  const { modelName, taskType } = modelMap[tool] || modelMap['ttv'];
-
-  // Duration mapping (seconds string)
-  const durMap = { '5':'5','10':'10','30':'30','60':'60','120':'120','180':'180' };
-  const videoDuration = durMap[String(duration)] || '10';
-
+  // Exact payload as per kie.ai official docs
   const payload = {
-    modelName,
-    taskType,
+    model: 'kling-2.6/text-to-video',
     input: {
       prompt: prompt.trim(),
-      negative_prompt: 'blurry, low quality, watermark, text, cartoon',
-      cfg_scale: 0.5,
-      mode: 'std',
+      sound: false,
       aspect_ratio: '16:9',
-      duration: videoDuration
+      duration: '10'
     }
   };
 
@@ -66,18 +40,18 @@ exports.handler = async (event) => {
     });
 
     const data = await res.json();
-    console.log('kie.ai response:', JSON.stringify(data));
+    console.log('kie.ai createTask response:', JSON.stringify(data));
 
-    if (!res.ok || data.code !== 200) {
+    if (data.code !== 200) {
       return {
         statusCode: 200,
-        body: JSON.stringify({ success: false, error: data.message || data.msg || `API error ${res.status}` })
+        body: JSON.stringify({ success: false, error: data.msg || `API error: ${data.code}` })
       };
     }
 
-    const taskId = data.data?.task_id || data.data?.taskId || data.taskId;
+    const taskId = data.data?.taskId;
     if (!taskId) {
-      return { statusCode: 200, body: JSON.stringify({ success: false, error: 'No taskId in response' }) };
+      return { statusCode: 200, body: JSON.stringify({ success: false, error: 'No taskId received from kie.ai' }) };
     }
 
     return {
@@ -87,6 +61,7 @@ exports.handler = async (event) => {
     };
 
   } catch (err) {
+    console.error('generate-video error:', err.message);
     return { statusCode: 200, body: JSON.stringify({ success: false, error: err.message }) };
   }
 };
