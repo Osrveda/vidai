@@ -333,7 +333,7 @@ body.cursor-hover #curR{width:44px;height:44px;border-color:rgba(232,121,249,.6)
 .cmp-tbl{width:100%;border-collapse:collapse;min-width:600px}
 .cmp-tbl th,.cmp-tbl td{padding:15px 22px;border-bottom:1px solid var(--border);font-size:14px;text-align:center;line-height:1.4}
 .cmp-tbl th{background:rgba(34,197,94,.04);font-family:'Sora',sans-serif;font-weight:700;font-size:13px}
-.cmp-tbl tr:last-child td{border-bottom:none}.cmp-tbl tr:hover td{background:rgba(34,197,94,.022)}
+.cmp-tbl tr:last-child td{border-bottom:none}.cmp-tbl tr:hover td{background:rgba(34,211,238,.09);transition:background .18s}
 .fc{text-align:left!important;color:var(--text);font-weight:500}.cpr{display:block;font-size:11px;font-weight:400;margin-top:4px;color:var(--muted)}
 .vt{background:rgba(34,197,94,.04)!important}.vtp{color:var(--p2);font-weight:700}.cy{color:var(--green2);font-weight:700;font-size:16px}.cn{color:#ff4466;font-weight:700;font-size:16px}
 .cr-ref{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-bottom:52px;background:rgba(255,255,255,.022);border:1px solid var(--border);border-radius:var(--r);padding:22px}
@@ -611,28 +611,28 @@ body::before{content:'' !important;position:fixed !important;inset:0 !important;
           <div class="tdi" onclick="selectTool('aie','AI Enhance','⬆️','30 cr')">⬆️ AI Enhance <span class="tdi-cr">30 cr</span></div>
           <div class="tdi" onclick="selectTool('or','Object Remove','✂️','35 cr')">✂️ Object Remove <span class="tdi-cr">35 cr</span></div>
           <div class="tdi" onclick="selectTool('cap','Auto Captions','💬','15 cr')">💬 Auto Captions <span class="tdi-cr">15 cr</span></div>
-          <div class="tdi" onclick="selectTool('stt','Style Transfer','🎨','55 cr')">🎨 Style Transfer <span class="tdi-cr">55 cr</span></div>
+          <div class="tdi" onclick="selectTool('cg','Color Grading','🎨','20 cr')">🎨 Color Grading <span class="tdi-cr">20 cr</span></div>
+          <div class="tdi" onclick="selectTool('sr','Sky Replace','☁️','30 cr')">☁️ Sky Replace <span class="tdi-cr">30 cr</span></div>
+          <div class="tdi" onclick="selectTool('stt','Style Transfer','🖌️','55 cr')">🖌️ Style Transfer <span class="tdi-cr">55 cr</span></div>
         </div>
       </div>
 
-      <!-- FIX 1: Clean textarea without stray tags -->
-      <div style="position:relative">
-        <textarea class="gen-ta" id="promptArea" placeholder="Apna video describe karo... e.g. 'Bollywood actress dancing at golden hour'" style="padding-bottom:60px"></textarea>
-        <div style="position:absolute;bottom:10px;left:10px;right:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <label style="cursor:pointer;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.4);border-radius:8px;padding:6px 10px;font-size:11px;color:#67e8f9;display:flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600">
-            🖼️ Image
-            <input type="file" accept="image/*" style="display:none" onchange="handleFileUpload(this,'image')">
-          </label>
-          <label style="cursor:pointer;background:rgba(232,121,249,.12);border:1px solid rgba(232,121,249,.4);border-radius:8px;padding:6px 10px;font-size:11px;color:#f0abfc;display:flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600">
-            🎥 Video
-            <input type="file" accept="video/*" style="display:none" onchange="handleFileUpload(this,'video')">
-          </label>
-          <label style="cursor:pointer;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4);border-radius:8px;padding:6px 10px;font-size:11px;color:#fde68a;display:flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600">
-            🎵 Audio
-            <input type="file" accept="audio/*" style="display:none" onchange="handleFileUpload(this,'audio')">
-          </label>
-          <span id="fileName" style="font-size:11px;color:#67e8f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1"></span>
-        </div>
+      <!-- PROMPT TEXTAREA -->
+      <textarea class="gen-ta" id="promptArea" placeholder="Apna video describe karo... e.g. 'Bollywood actress dancing at golden hour'"></textarea>
+
+      <!-- FILE UPLOAD ROW — clean separate row below textarea -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
+        <span style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase">Attach:</span>
+        <label style="cursor:pointer;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);border-radius:8px;padding:7px 14px;font-size:12px;color:#67e8f9;display:flex;align-items:center;gap:5px;font-weight:600;transition:background .2s" onmouseover="this.style.background='rgba(34,211,238,.16)'" onmouseout="this.style.background='rgba(34,211,238,.08)'">
+          🖼️ Image<input type="file" accept="image/*" style="display:none" onchange="handleFileUpload(this,'image')">
+        </label>
+        <label style="cursor:pointer;background:rgba(232,121,249,.08);border:1px solid rgba(232,121,249,.3);border-radius:8px;padding:7px 14px;font-size:12px;color:#f0abfc;display:flex;align-items:center;gap:5px;font-weight:600;transition:background .2s" onmouseover="this.style.background='rgba(232,121,249,.16)'" onmouseout="this.style.background='rgba(232,121,249,.08)'">
+          🎥 Video<input type="file" accept="video/*" style="display:none" onchange="handleFileUpload(this,'video')">
+        </label>
+        <label style="cursor:pointer;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:7px 14px;font-size:12px;color:#fde68a;display:flex;align-items:center;gap:5px;font-weight:600;transition:background .2s" onmouseover="this.style.background='rgba(251,191,36,.16)'" onmouseout="this.style.background='rgba(251,191,36,.08)'">
+          🎵 Audio<input type="file" accept="audio/*" style="display:none" onchange="handleFileUpload(this,'audio')">
+        </label>
+        <span id="fileName" style="font-size:11px;color:#67e8f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0"></span>
       </div>
 
       <div class="gen-opts">
@@ -662,17 +662,17 @@ body::before{content:'' !important;position:fixed !important;inset:0 !important;
           <button type="button" class="gpill" id="audioOn" onclick="setAudio(this,true)">🔊 With Audio <span style="font-size:9px;color:var(--p2)">×2 cr</span></button>
         </div>
       </div>
-      <div class="gen-foot">
+
+      <!-- FOOTER: Credits LEFT | Buttons RIGHT — single clean row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:4px">
         <div>
           <div class="cr-badge" id="crBadge">49 cr</div>
           <div class="cr-sub" id="crSub">Free · 5s · Text to Video</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button type="button" onclick="openBuyCredits()" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--p2);padding:10px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Sora,sans-serif">💳 Buy Credits</button>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <button type="button" id="hinglishBtn" onclick="hinglishToPrompt()" style="flex:1;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:#22c55e;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:700;font-family:Sora,sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(34,197,94,.15)'" onmouseout="this.style.background='rgba(34,197,94,.08)'">🇮🇳 Hinglish → English</button>
-            <button type="button" onclick="openTemplates()" style="flex:1;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);color:#818cf8;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:700;font-family:Sora,sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(99,102,241,.15)'" onmouseout="this.style.background='rgba(99,102,241,.08)'">📝 Templates</button>
-          </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button type="button" onclick="openBuyCredits()" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--p2);padding:10px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Sora,sans-serif;white-space:nowrap">💳 Buy</button>
+          <button type="button" id="hinglishBtn" onclick="hinglishToPrompt()" style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);color:#67e8f9;padding:10px 14px;border-radius:9px;font-size:12px;font-weight:700;font-family:Sora,sans-serif;cursor:pointer;white-space:nowrap">🇮🇳 Hinglish</button>
+          <button type="button" onclick="openTemplates()" style="background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.3);color:#818cf8;padding:10px 14px;border-radius:9px;font-size:12px;font-weight:700;font-family:Sora,sans-serif;cursor:pointer;white-space:nowrap">📝 Templates</button>
           <button type="button" class="gen-go" onclick="generateVideo()">Generate →</button>
         </div>
       </div>
@@ -1038,7 +1038,7 @@ const qCredits = {
   premium: { '5':179, '10':358,  '15':'❌' }
 };
 
-const toolCredits={ttv:120,itv:60,stv:100,pa:25,tp:60,vtv:70,fs:80,ls:150,ac:100,ta:80,se:25,br:20,aie:30,or:35,cap:15,stt:55,dg:70};
+const toolCredits={ttv:120,itv:60,stv:100,pa:25,tp:60,vtv:70,fs:80,ls:150,ac:100,ta:80,se:25,br:20,aie:30,or:35,cap:15,stt:55,dg:70,cg:20,sr:30};
 const qM={'720p':1,'1080p':1.7,'4K':3.5},dM={'5':1,'10':1.7,'30':3,'60':5,'120':8,'180':11};
 
 function toggleToolDrop(){
@@ -1109,7 +1109,7 @@ function setAudio(btn,val){
 }
 
 function updCr(){
-  const names={ttv:'Text to Video',itv:'Image to Video',stv:'Script to Video',pa:'Photo Animate',tp:'Talking Photo',vtv:'Video to Video',fs:'Face Swap',ls:'Lip Sync',ac:'Avatar Create',ta:'Talking Avatar',dg:'Dance Generator',se:'Sound Effects',br:'Background Remove',aie:'AI Enhance',or:'Object Remove',cap:'Auto Captions',stt:'Style Transfer'};
+  const names={ttv:'Text to Video',itv:'Image to Video',stv:'Script to Video',pa:'Photo Animate',tp:'Talking Photo',vtv:'Video to Video',fs:'Face Swap',ls:'Lip Sync',ac:'Avatar Create',ta:'Talking Avatar',dg:'Dance Generator',se:'Sound Effects',br:'Background Remove',aie:'AI Enhance',or:'Object Remove',cap:'Auto Captions',stt:'Style Transfer',cg:'Color Grading',sr:'Sky Replace'};
   const qlabels={free:'Free(Grok)',good:'Good(Sora2)',pro:'Pro(Kling2.5T)',premium:'Premium(Kling2.6)'};
   let crText='—', crSub='';
   if(lipSyncTools.includes(cT)){
@@ -1193,22 +1193,18 @@ async function hinglishToPrompt(){
   const txt = area.value.trim();
   if(!txt){ alert('Pehle kuch likho!'); return; }
   const btn = document.getElementById('hinglishBtn');
-  btn.textContent = '⏳ Translating...'; btn.disabled = true;
+  btn.textContent = '⏳...'; btn.disabled = true;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/.netlify/functions/hinglish', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:200,
-        messages:[{role:'user',content:`Convert this Hindi/Hinglish video description into a professional English AI video generation prompt (cinematic style, max 2 sentences): "${txt}". Reply ONLY with the English prompt, nothing else.`}]
-      })
+      body: JSON.stringify({ text: txt })
     });
     const d = await res.json();
-    const newPrompt = d.content?.[0]?.text?.trim();
-    if(newPrompt) area.value = newPrompt;
+    if(d.prompt) area.value = d.prompt;
+    else alert('Translation error, try again');
   } catch(e){ alert('Translation error, try again'); }
-  btn.textContent = '🇮🇳 Hinglish → English'; btn.disabled = false;
+  btn.textContent = '🇮🇳 Hinglish'; btn.disabled = false;
 }
 
 // ═══ PROGRESS BAR ═══
@@ -1293,6 +1289,10 @@ async function updateUIForUser(user){
   document.getElementById('userAvatar').textContent=name[0].toUpperCase();
   const{data}=await sb.from('profiles').select('credits').eq('id',user.id).single();
   if(data)document.getElementById('navCredits').textContent=data.credits+' cr';
+  // Redirect to dashboard on login (only if modal was just used, not on page load)
+  if(document.getElementById('authModal').classList.contains('open')){
+    setTimeout(()=>{ window.location.href='dashboard.html'; }, 600);
+  }
 }
 
 function updateUIForLogout(){
@@ -1527,11 +1527,6 @@ document.querySelectorAll('video[autoplay]').forEach(v=>{v.muted=true;vObs.obser
     </div>
   </div>
 </div>
-<script>
-document.getElementById('templatesPopup').style.display='none';
-document.getElementById('templatesPopup').style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center';
-function openTemplates(){ document.getElementById('templatesPopup').style.display='flex'; }
-function closeTemplates(){ document.getElementById('templatesPopup').style.display='none'; }
-</script>
+<!-- end -->
 </body>
 </html>
