@@ -16,26 +16,33 @@ exports.handler = async function(event, context) {
   if (!prompt) return { statusCode: 400, body: JSON.stringify({ error: 'Prompt required' }) };
 
   try {
-    // kie.ai API call
-    const kieResponse = await fetch('https://api.kie.ai/v1/video/generate', {
+    const kieResponse = await fetch('https://api.kie.ai/api/v1/jobs/createTask', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${KIE_API_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ prompt, model: tool || 'text-to-video' })
+      body: JSON.stringify({
+        model: 'kling-video',
+        prompt: prompt,
+        duration: 5,
+        aspectRatio: '16:9'
+      })
     });
 
     const kieData = await kieResponse.json();
 
-    if (!kieResponse.ok) {
-      return { statusCode: 400, body: JSON.stringify({ error: kieData.message || 'kie.ai error' }) };
+    if (!kieResponse.ok || kieData.code !== 200) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: kieData.msg || 'kie.ai error' })
+      };
     }
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ success: true, taskId: kieData.taskId || kieData.id, data: kieData })
+      body: JSON.stringify({ success: true, taskId: kieData.data?.taskId })
     };
 
   } catch (err) {
